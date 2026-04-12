@@ -22,7 +22,7 @@ const app = express();
 const port = process.env.PORT || 3000; 
 
 app.get('/', (req, res) => { 
-    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 Supreme Master V38.8 (Peak UX Edition) Active</h1>'); 
+    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 Supreme Master V38.9 (Professional UX Edition) Active</h1>'); 
 });
 
 app.listen(port, () => {
@@ -56,12 +56,12 @@ if (fs.existsSync('/data/data/com.termux/files/usr/bin/chromium-browser')) {
     puppeteerOptions.executablePath = '/data/data/com.termux/files/usr/bin/chromium-browser';
 }
 
-console.log(`\n🔥 SUPREME MASTER V38.8 INITIALIZING...\n`);
+console.log(`\n🔥 SUPREME MASTER V38.9 INITIALIZING...\n`);
 
 // ============================================================================
 // 🧠 4. STATE MANAGEMENT & PERSISTENT DB
 // ============================================================================
-let userLanguage = 'Hinglish'; 
+let userLanguage = 'English'; 
 const activeClients = {}; 
 let userStates = {}; 
 let knownBotUsers = [];
@@ -136,7 +136,26 @@ let adminConfig = {
 };
 
 const DIVIDER = '━━━━━━━━━━━━━━━━━━━━';
-const FOOTER = `\n${DIVIDER}\n👑 _Supreme System v38.8_ | Owner: ${OWNER_USERNAME}`;
+const FOOTER = `\n${DIVIDER}\n👑 _Supreme System v38.9_ | Owner: ${OWNER_USERNAME}`;
+
+// 🔥 RESTORED MULTILINGUAL DICTIONARY 🔥
+const texts = {
+    English: { 
+        start: "Command Center", status: "WA Status", session: "Auth Session", autoGroup: "Mass Group", 
+        join: "Auto-Join", kick: "Tactical Purge", stats: "Analytics", lang: "Language", broadcast: "WA Broadcast", 
+        extract: "Extract Links", approve: "Auto-Approve", rename: "Rename Groups", shield: "Manage GC Msg" 
+    },
+    Hinglish: { 
+        start: "Command Center", status: "Aapka WA Status", session: "Auth Session", autoGroup: "Mass Group", 
+        join: "Auto-Join", kick: "Tactical Purge", stats: "Analytics", lang: "Bhasha", broadcast: "WA Broadcast", 
+        extract: "Extract Links", approve: "Auto-Approve", rename: "Rename Groups", shield: "Manage GC Msg" 
+    },
+    Indonesian: { 
+        start: "Pusat Komando", status: "Status WA", session: "Sesi Auth", autoGroup: "Grup Massal", 
+        join: "Gabung Otomatis", kick: "Pembersihan", stats: "Analitik", lang: "Bahasa", broadcast: "Siaran WA", 
+        extract: "Ekstrak Tautan", approve: "Setujui Otomatis", rename: "Ubah Nama", shield: "Kelola Pesan GC" 
+    }
+};
 
 // ============================================================================
 // 🛠️ 5. SYSTEM HELPERS
@@ -186,12 +205,12 @@ async function checkAccess(userId, chatId, msgObj = null) {
     }
 
     if (adminConfig.bannedUsers.includes(userId)) { 
-        tgBot.sendMessage(chatId, `🚫 *BANNED*\nAap system use nahi kar sakte.`, { parse_mode: 'Markdown' }).catch(()=>{}); 
+        tgBot.sendMessage(chatId, `🚫 *ACCESS RESTRICTED*\nYour account has been suspended from using this system.`, { parse_mode: 'Markdown' }).catch(()=>{}); 
         return false; 
     }
 
     if (adminConfig.approvalRequired && !adminConfig.allowedUsers.includes(userId)) { 
-        tgBot.sendMessage(chatId, `🔒 *ACCESS DENIED*\nAapke paas approval nahi hai.`, { parse_mode: 'Markdown' }).catch(()=>{}); 
+        tgBot.sendMessage(chatId, `🔒 *AUTHORIZATION REQUIRED*\nAccess denied. Please contact the administrator for permission.`, { parse_mode: 'Markdown' }).catch(()=>{}); 
         return false; 
     }
 
@@ -211,14 +230,14 @@ function hasFeatureAccess(userId, featureKey) {
 }
 
 // ============================================================================
-// 🚀 6. WHATSAPP ENGINE (INSTANT MANAGE GC MSG INC.)
+// 🚀 6. WHATSAPP ENGINE
 // ============================================================================
 function startWhatsAppClient(userId, chatId, cleanNumber) {
     if (activeClients[userId] && activeClients[userId].status === 'initializing') {
-        return tgBot.sendMessage(chatId, `⚠️ Process pehle se chal raha hai bhai, thoda wait kar le.`);
+        return tgBot.sendMessage(chatId, `⚠️ Initialization is already in progress. Please wait.`);
     }
 
-    tgBot.sendMessage(chatId, `📡 *PHASE 1: Launching Turbo Engine...*`, { parse_mode: 'Markdown' });
+    tgBot.sendMessage(chatId, `📡 *PHASE 1: Launching Engine...*`, { parse_mode: 'Markdown' });
     
     const clientOptions = { 
         authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), 
@@ -233,14 +252,14 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
     activeClients[userId] = { client: client, status: 'initializing', isReady: false };
 
     client.on('code', (code) => { 
-        tgBot.sendMessage(chatId, `✅ *PAIRING CODE:*\nNumber: +${cleanNumber}\nToken: \`${code}\``, { parse_mode: 'Markdown' }); 
+        tgBot.sendMessage(chatId, `✅ *AUTHENTICATION CODE:*\n\nNumber: +${cleanNumber}\nToken: \`${code}\``, { parse_mode: 'Markdown' }); 
     });
 
     client.on('authenticated', () => { 
         if (activeClients[userId]) { 
             activeClients[userId].isReady = true; 
             activeClients[userId].status = 'connected'; 
-            tgBot.sendMessage(chatId, `✅ *INSTANT AUTH SUCCESS!*\nType /start to access dashboard.`, { parse_mode: 'Markdown' }); 
+            tgBot.sendMessage(chatId, `✅ *AUTHENTICATION SUCCESSFUL*\nWhatsApp session verified. Type /start to access the dashboard.`, { parse_mode: 'Markdown' }); 
         } 
     });
 
@@ -252,11 +271,11 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
     });
 
     client.on('disconnected', (reason) => { 
-        tgBot.sendMessage(chatId, `⚠️ *WhatsApp Disconnected!*\nReason: ${reason}`); 
+        tgBot.sendMessage(chatId, `⚠️ *Connection Lost*\nReason: ${reason}\nSession destroyed. Authentication required.`); 
         delete activeClients[userId]; 
     });
 
-    // INSTANT-KILL MANAGE GC MSG EXECUTION (< 1 SEC)
+    // INSTANT-KILL MANAGE GC MSG EXECUTION
     client.on('message', async (msg) => {
         const sec = adminConfig.securityConfig;
         
@@ -268,10 +287,9 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
             const chatGid = msg.from; 
             
             if (!chatGid.endsWith('@g.us')) {
-                return; // Only works in groups
+                return; 
             }
             
-            // TARGET VERIFICATION
             if (sec.targetMode !== 'ALL' && !sec.targetGroups.includes(chatGid)) {
                 return;
             }
@@ -284,12 +302,10 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
 
             const authorNum = authorId.split('@')[0];
             
-            // VIP IMMUNITY
             if (sec.vipNumbers.includes(authorNum)) {
                 return;
             }
             
-            // RULE MATCHING LOGIC
             let shouldDelete = false;
             let matchedCode = sec.countries.find(c => authorNum.startsWith(c));
             
@@ -304,27 +320,25 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
             }
 
             if (!shouldDelete) {
-                return; // Normal message, do nothing
+                return; 
             }
 
-            // PERMISSION VERIFICATION
             const chat = await msg.getChat();
             const botId = client.info.wid._serialized;
             const botParticipant = chat.participants.find(p => p.id._serialized === botId);
             
             if (!botParticipant || (!botParticipant.isAdmin && !botParticipant.isSuperAdmin)) {
-                return; // Bot doesn't have power to delete
+                return; 
             }
 
             const authPart = chat.participants.find(p => p.id._serialized === authorId);
             if (authPart && (authPart.isAdmin || authPart.isSuperAdmin)) {
-                return; // Author is admin immunity
+                return; 
             }
 
-            // 🔥 FIRE & FORGET PROTOCOL
+            // INSTANT EXECUTION
             msg.delete(true).catch(()=>{}); 
             
-            // GHOST LOGGING & AUTO-KICK SYSTEM
             let msgContent = msg.hasMedia ? '[MEDIA / STICKER]' : msg.body;
             
             if (!sec.violations[authorId]) {
@@ -336,14 +350,14 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
 
             if (strikes >= sec.strikeCount && sec.autoKickEnabled) {
                 chat.removeParticipants([authorId]).catch(()=>{}); 
-                tgBot.sendMessage(OWNER_ID, `⚔️ *MANAGE GC PURGE EXECUTED*\n${DIVIDER}\n🎯 Group: ${chat.name}\n💀 Target: +${authorNum}\n⚠️ Reason: ${strikes} Strikes Reached. Permanently Kicked.`, { parse_mode: 'Markdown' }).catch(()=>{});
+                tgBot.sendMessage(OWNER_ID, `⚔️ *MANAGE GC PURGE EXECUTED*\n${DIVIDER}\n🎯 Group: ${chat.name}\n💀 Target: +${authorNum}\n⚠️ Reason: ${strikes} Strikes Reached. Target Terminated.`, { parse_mode: 'Markdown' }).catch(()=>{});
                 sec.violations[authorId] = 0; 
             } else {
                 let sWarn = sec.autoKickEnabled ? `⚠️ Strike: ${strikes}/${sec.strikeCount}` : `⚠️ Strike: ${strikes} (Auto-Kick OFF)`;
-                tgBot.sendMessage(OWNER_ID, `🛡️ *MANAGE GC ALERT: NUKED IN < 1s*\n${DIVIDER}\n🎯 Group: ${chat.name}\n👤 Sender: +${authorNum}\n📄 Msg: _"${msgContent}"_\n${sWarn}\n💥 Action: Instantly Deleted`, { parse_mode: 'Markdown' }).catch(()=>{});
+                tgBot.sendMessage(OWNER_ID, `🛡️ *SYSTEM ALERT: MESSAGE INTERCEPTED*\n${DIVIDER}\n🎯 Group: ${chat.name}\n👤 Sender: +${authorNum}\n📄 Msg: _"${msgContent}"_\n${sWarn}\n💥 Action: Instantly Deleted`, { parse_mode: 'Markdown' }).catch(()=>{});
             }
         } catch (e) {
-            // Fails silently to maintain high-speed execution
+            // Silent catch to preserve execution speed
         }
     });
 
@@ -352,7 +366,6 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
     });
 }
 
-// AUTO-RESUME EXISTING SESSIONS
 if (fs.existsSync('./multi_sessions')) {
     fs.readdirSync('./multi_sessions').forEach(dir => {
         if (dir.startsWith('session-user_')) { 
@@ -363,7 +376,7 @@ if (fs.existsSync('./multi_sessions')) {
 }
 
 // ============================================================================
-// 🛡️ 7. PANELS & MENUS (BEAUTIFULLY FORMATTED)
+// 🛡️ 7. PANELS & MENUS
 // ============================================================================
 function sendAdminPanel(chatId, userId) {
     getState(userId).action = null;
@@ -441,10 +454,14 @@ function sendShieldMenu(chatId, userId, msgId = null) {
 function sendMainMenu(chatId, userId) {
     getState(userId).action = null; 
     const isReady = activeClients[userId] && activeClients[userId].isReady;
+    
+    // FETCH LANGUAGE DICTIONARY
+    const t = texts[userLanguage] || texts['English'];
+    
     let inlineKeyboard = [];
     
     if (!isReady && hasFeatureAccess(userId, 'login')) {
-        inlineKeyboard.push([{ text: `🔐 Auth Session`, callback_data: 'menu_login' }]);
+        inlineKeyboard.push([{ text: `🔐 ${t.session}`, callback_data: 'menu_login' }]);
     }
     
     let row1 = [];
@@ -453,55 +470,63 @@ function sendMainMenu(chatId, userId) {
     let row4 = [];
     
     if (hasFeatureAccess(userId, 'creategroup')) {
-        row1.push({ text: `➕ Mass Group`, callback_data: 'menu_creategroup' });
+        row1.push({ text: `➕ ${t.autoGroup}`, callback_data: 'menu_creategroup' });
     }
     if (hasFeatureAccess(userId, 'joingroup')) {
-        row1.push({ text: `📥 Auto-Join`, callback_data: 'menu_joingroup' });
+        row1.push({ text: `📥 ${t.join}`, callback_data: 'menu_joingroup' });
     }
     if (row1.length > 0) {
         inlineKeyboard.push(row1);
     }
     
     if (hasFeatureAccess(userId, 'renamegroups')) {
-        row2.push({ text: `✏️ Rename Groups`, callback_data: 'menu_rename_groups' });
+        row2.push({ text: `✏️ ${t.rename}`, callback_data: 'menu_rename_groups' });
     }
     if (hasFeatureAccess(userId, 'extractlinks')) {
-        row2.push({ text: `🔗 Extract Links`, callback_data: 'menu_extractlinks' });
+        row2.push({ text: `🔗 ${t.extract}`, callback_data: 'menu_extractlinks' });
     }
     if (row2.length > 0) {
         inlineKeyboard.push(row2);
     }
     
     if (hasFeatureAccess(userId, 'approve')) {
-        row3.push({ text: `👥 Auto-Approve`, callback_data: 'menu_approve' });
+        row3.push({ text: `👥 ${t.approve}`, callback_data: 'menu_approve' });
     }
     if (hasFeatureAccess(userId, 'autokick')) {
-        row3.push({ text: `⚔️ Tactical Purge`, callback_data: 'menu_autokick' });
+        row3.push({ text: `⚔️ ${t.kick}`, callback_data: 'menu_autokick' });
     }
     if (row3.length > 0) {
         inlineKeyboard.push(row3);
     }
     
     if (hasFeatureAccess(userId, 'broadcast')) {
-        row4.push({ text: `📢 WhatsApp Broadcast`, callback_data: 'menu_broadcast' });
+        row4.push({ text: `📢 ${t.broadcast}`, callback_data: 'menu_broadcast' });
     }
     if (hasFeatureAccess(userId, 'stats')) {
-        row4.push({ text: `📊 Stats`, callback_data: 'menu_stats' });
+        row4.push({ text: `📊 ${t.stats}`, callback_data: 'menu_stats' });
     }
     if (row4.length > 0) {
         inlineKeyboard.push(row4);
     }
     
     if (hasFeatureAccess(userId, 'security')) {
-        inlineKeyboard.push([{ text: `🛡️ Manage GC Msg`, callback_data: 'menu_security' }]);
+        inlineKeyboard.push([{ text: `🛡️ ${t.shield}`, callback_data: 'menu_security' }]);
     }
+
+    // 🔥 RESTORED LANGUAGE BUTTON 🔥
+    inlineKeyboard.push([{ text: `🌐 ${t.lang}: ${userLanguage}`, callback_data: 'menu_toggle_lang' }]);
     
     if (userId === OWNER_ID) {
         inlineKeyboard.push([{ text: `👑 OVERLORD ADMIN PANEL`, callback_data: 'btn_admin_panel' }]);
     }
     
-    const humanStatus = isReady ? '🟢 WA Connected & Ready! (Macha do)' : '🔴 WA Disconnected (Bhai, pehle login karlo)';
+    // PROFESSIONAL HUMAN-LIKE STATUS TEXT
+    const humanStatus = isReady 
+        ? '🟢 Engine Online & Synchronized. System is ready.' 
+        : '🔴 Engine Offline. Authentication required.';
+        
     const menuText = `🤖 *COMMAND CENTER* \n${DIVIDER}\n📡 Status: ${humanStatus}${FOOTER}`;
+    
     tgBot.sendMessage(chatId, menuText, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: inlineKeyboard } }).catch(()=>{});
 }
 
@@ -520,7 +545,7 @@ tgBot.onText(/\/admin/, async (msg) => {
 });
 
 // ============================================================================
-// ⌨️ 9. CALLBACK QUERIES (100% RESTORED LOGIC)
+// ⌨️ 9. CALLBACK QUERIES
 // ============================================================================
 tgBot.on('callback_query', async (query) => {
     const chatId = query.message.chat.id; 
@@ -541,6 +566,20 @@ tgBot.on('callback_query', async (query) => {
     if (data === 'btn_admin_panel') { 
         tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{}); 
         return sendAdminPanel(chatId, userId); 
+    }
+    
+    // 🔥 RESTORED LANGUAGE TOGGLE HANDLER 🔥
+    if (data === 'menu_toggle_lang') { 
+        if (userLanguage === 'Hinglish') {
+            userLanguage = 'English';
+        } else if (userLanguage === 'English') {
+            userLanguage = 'Indonesian';
+        } else {
+            userLanguage = 'Hinglish';
+        }
+        
+        tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{});
+        return sendMainMenu(chatId, userId); 
     }
     
     if (data === 'admin_bot_broadcast') {
@@ -574,12 +613,12 @@ tgBot.on('callback_query', async (query) => {
 
     if (data === 'sec_tgt_links') { 
         state.action = 'WAIT_SEC_LINKS'; 
-        return tgBot.editMessageText(`🔗 *SETUP VIA LINKS*\nBhai, WhatsApp invite links bhej de yahan:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
+        return tgBot.editMessageText(`🔗 *SETUP VIA LINKS*\nPlease provide WhatsApp invite links below:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
     }
 
     if (data === 'sec_tgt_select') {
         if (!uClient || !uClient.info) {
-            return tgBot.answerCallbackQuery(query.id, { text: "⚠️ Bhai, pehle apna WhatsApp connect (Login) kar lo, system abhi offline hai!", show_alert: true });
+            return tgBot.answerCallbackQuery(query.id, { text: "⚠️ System is offline. Please authenticate first.", show_alert: true });
         }
         
         let status = await tgBot.sendMessage(chatId, "📡 *Scanning privileges...*", { parse_mode: 'Markdown' });
@@ -751,7 +790,7 @@ tgBot.on('callback_query', async (query) => {
     
     if (menuActions.includes(data)) {
         if (!activeClients[userId] || !activeClients[userId].isReady) {
-            return tgBot.answerCallbackQuery(query.id, { text: "⚠️ Bhai, pehle apna WhatsApp connect (Login) kar lo, system abhi offline hai!", show_alert: true });
+            return tgBot.answerCallbackQuery(query.id, { text: "⚠️ System is offline. Please authenticate first.", show_alert: true });
         }
 
         if (data === 'menu_stats') {
@@ -974,16 +1013,16 @@ tgBot.on('message', async (msg) => {
             const uClient = activeClients[userId]?.client;
             
             if (!uClient) {
-                return tgBot.sendMessage(chatId, "⚠️ Bhai, pehle WhatsApp connect (Login) kar lo!");
+                return tgBot.sendMessage(chatId, "⚠️ System requires authentication. Please log in first.");
             }
             
             const codes = [...text.matchAll(/(?:chat\.whatsapp\.com\/)([a-zA-Z0-9]{15,25})/gi)].map(m => m[1]);
             
             if (codes.length === 0) {
-                return tgBot.sendMessage(chatId, "⚠️ Bhai, koi valid link nahi mili.");
+                return tgBot.sendMessage(chatId, "⚠️ No valid links detected in your message.");
             }
             
-            let statusMsg = await tgBot.sendMessage(chatId, `⏳ *Securing Links...*`);
+            let statusMsg = await tgBot.sendMessage(chatId, `⏳ *Securing Target Links...*`);
             adminConfig.securityConfig.targetMode = 'LINKS';
             
             if(adminConfig.securityConfig.targetMode !== 'LINKS') {
@@ -1041,22 +1080,22 @@ tgBot.on('message', async (msg) => {
     if (state.action === 'WAITING_FOR_ALLOW_ID') { 
         adminConfig.allowedUsers.push(parseInt(text)); 
         state.action = null; 
-        return tgBot.sendMessage(chatId, `✅ Allowed.`); 
+        return tgBot.sendMessage(chatId, `✅ User successfully allowed.`); 
     }
     if (state.action === 'WAITING_FOR_REVOKE_ID') { 
         adminConfig.allowedUsers = adminConfig.allowedUsers.filter(u => u !== parseInt(text)); 
         state.action = null; 
-        return tgBot.sendMessage(chatId, `❌ Revoked.`); 
+        return tgBot.sendMessage(chatId, `❌ Access successfully revoked.`); 
     }
     if (state.action === 'WAITING_FOR_BAN_ID') { 
         adminConfig.bannedUsers.push(parseInt(text)); 
         state.action = null; 
-        return tgBot.sendMessage(chatId, `🚫 Banned.`); 
+        return tgBot.sendMessage(chatId, `🚫 User successfully banned.`); 
     }
     if (state.action === 'WAITING_FOR_UNBAN_ID') { 
         adminConfig.bannedUsers = adminConfig.bannedUsers.filter(u => u !== parseInt(text)); 
         state.action = null; 
-        return tgBot.sendMessage(chatId, `♻️ Unbanned.`); 
+        return tgBot.sendMessage(chatId, `♻️ User successfully unbanned.`); 
     }
 
     // CORE FEATURE COLLECTION
@@ -1123,7 +1162,7 @@ tgBot.on('message', async (msg) => {
             } catch(e) {} 
         }
         
-        return tgBot.sendMessage(chatId, `✅ Delivered.`);
+        return tgBot.sendMessage(chatId, `✅ Message successfully delivered.`);
     }
 
     if (state.action === 'WAIT_RENAME_DATA') {
