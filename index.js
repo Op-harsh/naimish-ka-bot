@@ -22,7 +22,7 @@ const app = express();
 const port = process.env.PORT || 3000; 
 
 app.get('/', (req, res) => { 
-    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 Supreme Master V41 (Flawless God-Tier) Active</h1>'); 
+    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 Supreme Master V42 (Single-File God-Tier) Active</h1>'); 
 });
 
 app.listen(port, () => {
@@ -56,20 +56,20 @@ if (fs.existsSync('/data/data/com.termux/files/usr/bin/chromium-browser')) {
     puppeteerOptions.executablePath = '/data/data/com.termux/files/usr/bin/chromium-browser';
 }
 
-console.log(`\n🔥 SUPREME MASTER V41 INITIALIZING...\n`);
+console.log(`\n🔥 SUPREME MASTER V42 INITIALIZING...\n`);
 
 // ============================================================================
-// 🧠 4. STATE MANAGEMENT & PERSISTENT DB (FIXED RACE CONDITIONS)
+// 🧠 4. STATE MANAGEMENT, MEMORY MAPS & PERSISTENT DB
 // ============================================================================
-let userLanguage = 'English'; 
-const activeClients = {}; 
+// 🔥 RAM OPTIMIZATION: Using Map instead of standard object for heavy clients
+const activeClients = new Map(); 
 let userStates = {}; 
 let knownBotUsers = [];
 
 const BOT_USERS_FILE = './bot_users.json';
 const ADMIN_CONFIG_FILE = './admin_config.json';
 
-// 🔥 SMART DATABASE LOAD 🔥
+// Smart Database Load
 if (fs.existsSync(BOT_USERS_FILE)) {
     try { 
         knownBotUsers = JSON.parse(fs.readFileSync(BOT_USERS_FILE)); 
@@ -145,6 +145,7 @@ function getState(userId) {
             flowContext: '', 
             selectedGroupsArray: [], 
             lastMsgId: null,
+            language: 'English', // 🔥 GPT FIX: Per-user language setting
             groupConfig: { 
                 baseName: '', count: 0, memberId: '', desc: '', pfpPath: null, 
                 settings: { msgsAdminOnly: false, infoAdminOnly: false } 
@@ -155,7 +156,7 @@ function getState(userId) {
 }
 
 const DIVIDER = '━━━━━━━━━━━━━━━━━━━━';
-const FOOTER = `\n${DIVIDER}\n👑 _Supreme System v41_ | Owner: ${OWNER_USERNAME}`;
+const FOOTER = `\n${DIVIDER}\n👑 _Supreme System v42_ | Owner: ${OWNER_USERNAME}`;
 
 const texts = {
     English: { 
@@ -176,8 +177,19 @@ const texts = {
 };
 
 // ============================================================================
-// 🛠️ 5. SYSTEM HELPERS (100% FIXED)
+// 🛠️ 5. SYSTEM HELPERS (WITH SAFESEND WRAPPER)
 // ============================================================================
+
+// 🔥 GPT FIX: Centralized SafeSend Wrapper
+async function safeSend(chatId, text, options = {}) {
+    try {
+        return await tgBot.sendMessage(chatId, text, { parse_mode: 'Markdown', ...options });
+    } catch (e) {
+        console.error(`SafeSend Error [Chat: ${chatId}]:`, e.message);
+        return null;
+    }
+}
+
 function createProgressBar(current, total) {
     if (total === 0) return `[██████████] 100%`;
     const length = 10; 
@@ -200,12 +212,11 @@ async function sendLongReport(chatId, text, filename, options = {}) {
             console.error("Report generation failed:", e);
         }
     } else { 
-        tgBot.sendMessage(chatId, text, { parse_mode: 'Markdown', ...options }).catch(()=>{}); 
+        safeSend(chatId, text, options); 
     }
 }
 
 async function checkAccess(userId, chatId, msgObj = null) {
-    // 🔥 RACE-CONDITION FIX (Synchronous Save)
     if (!knownBotUsers.includes(userId)) { 
         knownBotUsers.push(userId); 
         try {
@@ -216,23 +227,22 @@ async function checkAccess(userId, chatId, msgObj = null) {
         
         if (adminConfig.botAlerts && msgObj) {
             const userName = msgObj.from?.first_name || 'Unknown';
-            tgBot.sendMessage(OWNER_ID, `🚨 *NEW USER DETECTED*\n${DIVIDER}\n👤 *Name:* ${userName}\n🆔 *ID:* \`${userId}\`\n${FOOTER}`, { parse_mode: 'Markdown' }).catch(()=>{});
+            safeSend(OWNER_ID, `🚨 *NEW USER DETECTED*\n${DIVIDER}\n👤 *Name:* ${userName}\n🆔 *ID:* \`${userId}\`\n${FOOTER}`);
         }
     }
 
     if (userId === OWNER_ID || adminConfig.admins.includes(userId)) return true;
 
     if (adminConfig.bannedUsers.includes(userId)) { 
-        tgBot.sendMessage(chatId, `🚫 *ACCESS RESTRICTED*\nYour account has been suspended from using this system.`, { parse_mode: 'Markdown' }).catch(()=>{}); 
+        safeSend(chatId, `🚫 *ACCESS RESTRICTED*\nYour account has been suspended from using this system.`); 
         return false; 
     }
 
     if (adminConfig.approvalRequired && !adminConfig.allowedUsers.includes(userId)) { 
-        tgBot.sendMessage(chatId, `🔒 *AUTHORIZATION REQUIRED*\nAccess denied. Please contact the administrator for permission.`, { parse_mode: 'Markdown' }).catch(()=>{}); 
+        safeSend(chatId, `🔒 *AUTHORIZATION REQUIRED*\nAccess denied. Please contact the administrator for permission.`); 
         return false; 
     }
 
-    // 🔥 FORCE SUB ENGINE ACTIVATED (FIXED) 🔥
     if (adminConfig.fsubEnabled && adminConfig.fsubChannels.length > 0) {
         let isSubscribed = true;
         let joinButtons = [];
@@ -245,7 +255,6 @@ async function checkAccess(userId, chatId, msgObj = null) {
                     joinButtons.push([{ text: `📢 Join Channel`, url: ch.link }]);
                 }
             } catch (e) {
-                // If bot is not admin in the specified channel
                 console.error(`F-Sub Error for ${ch.id}:`, e.message);
                 isSubscribed = false; 
                 joinButtons.push([{ text: `📢 Join Channel`, url: ch.link }]);
@@ -253,10 +262,9 @@ async function checkAccess(userId, chatId, msgObj = null) {
         }
         
         if (!isSubscribed) {
-            tgBot.sendMessage(chatId, `⚠️ *ACCESS DENIED*\n\nPlease join our official channels to use this bot!`, { 
-                parse_mode: 'Markdown', 
+            safeSend(chatId, `⚠️ *ACCESS DENIED*\n\nPlease join our official channels to use this bot!`, { 
                 reply_markup: { inline_keyboard: joinButtons } 
-            }).catch(()=>{});
+            });
             return false;
         }
     }
@@ -272,14 +280,16 @@ function hasFeatureAccess(userId, featureKey) {
 }
 
 // ============================================================================
-// 🚀 6. WHATSAPP ENGINE (CRASH PROOFED)
+// 🚀 6. WHATSAPP ENGINE (MEMORY OPTIMIZED MAPS)
 // ============================================================================
 function startWhatsAppClient(userId, chatId, cleanNumber) {
-    if (activeClients[userId] && activeClients[userId].status === 'initializing') {
-        return tgBot.sendMessage(chatId, `⚠️ Initialization is already in progress. Please wait.`);
+    const session = activeClients.get(userId);
+    
+    if (session && session.status === 'initializing') {
+        return safeSend(chatId, `⚠️ Engine initialization is already in progress. Please wait.`);
     }
 
-    tgBot.sendMessage(chatId, `📡 *PHASE 1: Launching Engine...*`, { parse_mode: 'Markdown' });
+    safeSend(chatId, `📡 *PHASE 1: Launching Engine...*`);
     
     const clientOptions = { 
         authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), 
@@ -291,30 +301,34 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
     }
 
     const client = new Client(clientOptions);
-    activeClients[userId] = { client: client, status: 'initializing', isReady: false };
+    
+    // Store in Map
+    activeClients.set(userId, { client: client, status: 'initializing', isReady: false });
 
     client.on('code', (code) => { 
-        tgBot.sendMessage(chatId, `✅ *AUTHENTICATION CODE:*\n\nNumber: +${cleanNumber}\nToken: \`${code}\``, { parse_mode: 'Markdown' }); 
+        safeSend(chatId, `✅ *AUTHENTICATION CODE:*\n\nNumber: +${cleanNumber}\nToken: \`${code}\``); 
     });
 
     client.on('authenticated', () => { 
-        if (activeClients[userId]) { 
-            activeClients[userId].isReady = true; 
-            activeClients[userId].status = 'connected'; 
-            tgBot.sendMessage(chatId, `✅ *AUTHENTICATION SUCCESSFUL*\nWhatsApp session verified. Type /start to access the dashboard.`, { parse_mode: 'Markdown' }); 
+        const currentSession = activeClients.get(userId);
+        if (currentSession) { 
+            currentSession.isReady = true; 
+            currentSession.status = 'connected'; 
+            safeSend(chatId, `✅ *AUTHENTICATION SUCCESSFUL*\nWhatsApp session verified. Type /start to access the dashboard.`); 
         } 
     });
 
     client.on('ready', () => { 
-        if (activeClients[userId]) { 
-            activeClients[userId].isReady = true; 
-            activeClients[userId].status = 'connected'; 
+        const currentSession = activeClients.get(userId);
+        if (currentSession) { 
+            currentSession.isReady = true; 
+            currentSession.status = 'connected'; 
         } 
     });
 
     client.on('disconnected', (reason) => { 
-        tgBot.sendMessage(chatId, `⚠️ *Connection Lost*\nReason: ${reason}\nSession destroyed. Authentication required.`); 
-        delete activeClients[userId]; 
+        safeSend(chatId, `⚠️ *Connection Lost*\nReason: ${reason}\nSession destroyed. Authentication required.`); 
+        activeClients.delete(userId); 
     });
 
     client.on('message', async (msg) => {
@@ -369,18 +383,18 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
 
             if (strikes >= sec.strikeCount && sec.autoKickEnabled) {
                 chat.removeParticipants([authorId]).catch(()=>{}); 
-                tgBot.sendMessage(OWNER_ID, `⚔️ *MANAGE GC PURGE EXECUTED*\n${DIVIDER}\n🎯 Group: ${chat.name}\n💀 Target: +${authorNum}\n⚠️ Reason: ${strikes} Strikes Reached. Target Terminated.`, { parse_mode: 'Markdown' }).catch(()=>{});
+                safeSend(OWNER_ID, `⚔️ *MANAGE GC PURGE EXECUTED*\n${DIVIDER}\n🎯 Group: ${chat.name}\n💀 Target: +${authorNum}\n⚠️ Reason: ${strikes} Strikes Reached. Target Terminated.`);
                 sec.violations[authorId] = 0; 
                 saveAdminConfig();
             } else {
                 let sWarn = sec.autoKickEnabled ? `⚠️ Strike: ${strikes}/${sec.strikeCount}` : `⚠️ Strike: ${strikes} (Auto-Kick OFF)`;
-                tgBot.sendMessage(OWNER_ID, `🛡️ *SYSTEM ALERT: MESSAGE INTERCEPTED*\n${DIVIDER}\n🎯 Group: ${chat.name}\n👤 Sender: +${authorNum}\n📄 Msg: _"${msgContent}"_\n${sWarn}\n💥 Action: Instantly Deleted`, { parse_mode: 'Markdown' }).catch(()=>{});
+                safeSend(OWNER_ID, `🛡️ *SYSTEM ALERT: MESSAGE INTERCEPTED*\n${DIVIDER}\n🎯 Group: ${chat.name}\n👤 Sender: +${authorNum}\n📄 Msg: _"${msgContent}"_\n${sWarn}\n💥 Action: Instantly Deleted`);
             }
         } catch (e) {}
     });
 
     client.initialize().catch(e => { 
-        delete activeClients[userId]; 
+        activeClients.delete(userId); 
     });
 }
 
@@ -426,7 +440,7 @@ function sendAdminPanel(chatId, userId) {
         ]
     };
     
-    tgBot.sendMessage(chatId, `🛡️ *ADMIN PANEL*\nTotal System Users: ${knownBotUsers.length}`, { parse_mode: 'Markdown', reply_markup: adminKeyboard }).catch(()=>{});
+    safeSend(chatId, `🛡️ *ADMIN PANEL*\nTotal System Users: ${knownBotUsers.length}`, { reply_markup: adminKeyboard });
 }
 
 function sendShieldMenu(chatId, userId, msgId = null) {
@@ -457,13 +471,18 @@ function sendShieldMenu(chatId, userId, msgId = null) {
     };
 
     if (msgId) tgBot.editMessageText(txt, { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown', reply_markup: kb }).catch(()=>{});
-    else tgBot.sendMessage(chatId, txt, { parse_mode: 'Markdown', reply_markup: kb });
+    else safeSend(chatId, txt, { reply_markup: kb });
 }
 
 function sendMainMenu(chatId, userId) {
-    getState(userId).action = null; 
-    const isReady = activeClients[userId] && activeClients[userId].isReady;
-    const t = texts[userLanguage] || texts['English'];
+    const state = getState(userId);
+    state.action = null; 
+    
+    const session = activeClients.get(userId);
+    const isReady = session && session.isReady;
+    
+    // Using per-user language dynamically
+    const t = texts[state.language] || texts['English'];
     let inlineKeyboard = [];
     
     if (!isReady && hasFeatureAccess(userId, 'login')) {
@@ -491,7 +510,7 @@ function sendMainMenu(chatId, userId) {
     
     if (hasFeatureAccess(userId, 'security')) inlineKeyboard.push([{ text: `🛡️ ${t.shield}`, callback_data: 'menu_security' }]);
 
-    inlineKeyboard.push([{ text: `🌐 ${t.lang}: ${userLanguage}`, callback_data: 'menu_toggle_lang' }]);
+    inlineKeyboard.push([{ text: `🌐 ${t.lang}: ${state.language}`, callback_data: 'menu_toggle_lang' }]);
     
     if (userId === OWNER_ID || adminConfig.admins.includes(userId)) {
         inlineKeyboard.push([{ text: `👑 OVERLORD ADMIN PANEL`, callback_data: 'btn_admin_panel' }]);
@@ -500,7 +519,7 @@ function sendMainMenu(chatId, userId) {
     const humanStatus = isReady ? '🟢 Engine Online & Synchronized. System is ready.' : '🔴 Engine Offline. Authentication required.';
     const menuText = `🤖 *COMMAND CENTER* \n${DIVIDER}\n📡 Status: ${humanStatus}${FOOTER}`;
     
-    tgBot.sendMessage(chatId, menuText, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: inlineKeyboard } }).catch(()=>{});
+    safeSend(chatId, menuText, { reply_markup: { inline_keyboard: inlineKeyboard } });
 }
 
 tgBot.onText(/\/start/, async (msg) => { 
@@ -521,7 +540,9 @@ tgBot.on('callback_query', async (query) => {
     const userId = query.from.id; 
     const data = query.data; 
     const state = getState(userId);
-    const uClient = activeClients[userId] ? activeClients[userId].client : null;
+    
+    const session = activeClients.get(userId);
+    const uClient = session ? session.client : null;
     
     tgBot.answerCallbackQuery(query.id).catch(()=>{});
 
@@ -545,27 +566,27 @@ tgBot.on('callback_query', async (query) => {
     }
 
     if (data === 'menu_logout_execute') {
-        if (activeClients[userId]) {
+        if (session) {
             try {
                 tgBot.editMessageText(`⏳ *Executing Deep Wipe Protocol...*`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }).catch(()=>{});
-                if (activeClients[userId].client) await activeClients[userId].client.logout().catch(()=>{});
+                if (session.client) await session.client.logout().catch(()=>{});
                 const sessionPath = path.join(__dirname, 'multi_sessions', `session-user_${userId}`);
                 if (fs.existsSync(sessionPath)) fs.rmSync(sessionPath, { recursive: true, force: true });
-                delete activeClients[userId];
-                tgBot.sendMessage(chatId, `✅ *SUCCESSFUL DISCONNECT*\nYour previous session has been wiped. You can now authenticate a new number.`, { parse_mode: 'Markdown' });
+                activeClients.delete(userId);
+                safeSend(chatId, `✅ *SUCCESSFUL DISCONNECT*\nYour previous session has been wiped. You can now authenticate a new number.`);
                 return sendMainMenu(chatId, userId);
             } catch (e) {
-                return tgBot.sendMessage(chatId, `❌ An error occurred while wiping the session.`);
+                return safeSend(chatId, `❌ An error occurred while wiping the session.`);
             }
         } else {
-            return tgBot.sendMessage(chatId, `⚠️ No active session found to disconnect.`);
+            return safeSend(chatId, `⚠️ No active session found to disconnect.`);
         }
     }
     
     if (data === 'menu_toggle_lang') { 
-        if (userLanguage === 'Hinglish') userLanguage = 'English';
-        else if (userLanguage === 'English') userLanguage = 'Indonesian';
-        else userLanguage = 'Hinglish';
+        if (state.language === 'English') state.language = 'Hinglish';
+        else if (state.language === 'Hinglish') state.language = 'Indonesian';
+        else state.language = 'English';
         tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{});
         return sendMainMenu(chatId, userId); 
     }
@@ -605,13 +626,13 @@ tgBot.on('callback_query', async (query) => {
     }
 
     if (data === 'sec_tgt_select') {
-        if (!uClient || !uClient.info) return tgBot.sendMessage(chatId, "⚠️ System is offline. Please authenticate first.");
-        let status = await tgBot.sendMessage(chatId, "📡 *Scanning privileges...*", { parse_mode: 'Markdown' });
+        if (!uClient || !uClient.info) return safeSend(chatId, "⚠️ System is offline. Please authenticate first.");
+        let statusMsg = await safeSend(chatId, "📡 *Scanning privileges...*");
         try {
             const chats = await uClient.getChats();
             state.adminGroups = chats.filter(c => c.isGroup && c.participants.find(p => p.id.user === uClient.info.wid.user && (p.isAdmin || p.isSuperAdmin))).map(c => ({ id: c.id._serialized, name: c.name }));
-            tgBot.deleteMessage(chatId, status.message_id).catch(()=>{});
-            if (state.adminGroups.length === 0) return tgBot.sendMessage(chatId, "❌ Admin rights not found in any group.");
+            if (statusMsg) tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
+            if (state.adminGroups.length === 0) return safeSend(chatId, "❌ Admin rights not found in any group.");
             state.currentPage = 0; 
             state.selectedGroupsArray = [...getSecurityConfig(userId).targetGroups]; 
             state.flowContext = 'SHIELD_TARGETS';
@@ -676,7 +697,7 @@ tgBot.on('callback_query', async (query) => {
             kb.push([{ text: '🔙 Back', callback_data: 'btn_admin_panel' }]);
             return tgBot.editMessageText(`👥 *MANAGE ADMINS*\nClick to revoke rights:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: kb } });
         }
-        if (data === 'admin_add_fsub') { state.action = 'WAITING_FOR_FSUB_DATA'; return tgBot.editMessageText(`📢 *ADD FORCE SUB CHANNEL*\nFormat:\n\`@ChannelID | https://link.com\``, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '❌ Cancel', callback_data: 'btn_admin_panel'}]] } }); }
+        if (data === 'admin_add_fsub') { state.action = 'WAITING_FOR_FSUB_DATA'; return tgBot.editMessageText(`📢 *ADD FORCE SUB CHANNEL*\nFormat:\n\`@ChannelID https://link.com\``, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '❌ Cancel', callback_data: 'btn_admin_panel'}]] } }); }
         if (data === 'admin_manage_fsubs') {
             let kb = adminConfig.fsubChannels.map(ch => ([{ text: `❌ Remove: ${ch.id}`, callback_data: `rem_fsub_${ch.id}` }]));
             kb.push([{ text: '🔙 Back', callback_data: 'btn_admin_panel' }]);
@@ -752,8 +773,8 @@ tgBot.on('callback_query', async (query) => {
     
     const menuActions = ['menu_creategroup', 'menu_joingroup', 'menu_rename_groups', 'menu_extractlinks', 'menu_approve', 'menu_autokick', 'menu_broadcast', 'menu_stats'];
     if (menuActions.includes(data)) {
-        if (!activeClients[userId] || !activeClients[userId].isReady) {
-            return tgBot.sendMessage(chatId, "⚠️ System is offline. Please authenticate first.");
+        if (!session || !session.isReady) {
+            return safeSend(chatId, "⚠️ System is offline. Please authenticate first.");
         }
 
         if (data === 'menu_stats') return; 
@@ -773,13 +794,13 @@ tgBot.on('callback_query', async (query) => {
             return tgBot.editMessageText("✏️ *MASS RENAMER*\nSend Name & Link pairs:", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '❌ Cancel', callback_data: 'btn_main_menu'}]] } }); 
         }
         
-        let status = await tgBot.sendMessage(chatId, "📡 *Scanning privileges...*", { parse_mode: 'Markdown' });
+        let statusMsg = await safeSend(chatId, "📡 *Scanning privileges...*");
         try {
             const chats = await uClient.getChats();
             state.adminGroups = chats.filter(c => c.isGroup && c.participants.find(p => p.id.user === uClient.info.wid.user && (p.isAdmin || p.isSuperAdmin))).map(c => ({ id: c.id._serialized, name: c.name }));
-            tgBot.deleteMessage(chatId, status.message_id).catch(()=>{});
+            if (statusMsg) tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
             
-            if (state.adminGroups.length === 0) return tgBot.sendMessage(chatId, "❌ Admin rights not found.");
+            if (state.adminGroups.length === 0) return safeSend(chatId, "❌ Admin rights not found.");
             
             state.currentPage = 0; 
             state.selectedGroupsArray = []; 
@@ -893,7 +914,7 @@ function sendGroupSettingsMenu(chatId, userId, msgId) {
         ]
     };
     if (msgId) tgBot.editMessageText(`⚙️ *Phase 6: Permissions*`, { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown', reply_markup: kb }).catch(()=>{});
-    else tgBot.sendMessage(chatId, `⚙️ *Phase 6: Permissions*`, { parse_mode: 'Markdown', reply_markup: kb });
+    else safeSend(chatId, `⚙️ *Phase 6: Permissions*`, { reply_markup: kb });
 }
 
 // ============================================================================
@@ -910,9 +931,9 @@ tgBot.on('message', async (msg) => {
     if (state.action === 'WAIT_BOT_BROADCAST_MSG') {
         state.action = null;
         let targets = [...knownBotUsers]; 
-        if (targets.length === 0) return tgBot.sendMessage(chatId, `⚠️ No bot users in database.`);
+        if (targets.length === 0) return safeSend(chatId, `⚠️ No bot users in database.`);
         
-        let statusMsg = await tgBot.sendMessage(chatId, `⏳ *Transmitting Payload to ${targets.length} users...*`, { parse_mode: 'Markdown' });
+        let statusMsg = await safeSend(chatId, `⏳ *Transmitting Payload to ${targets.length} users...*`);
         let success = 0; let failed = 0;
 
         for (let i = 0; i < targets.length; i++) {
@@ -921,22 +942,23 @@ tgBot.on('message', async (msg) => {
                 success++;
             } catch (e) { failed++; }
             await new Promise(r => setTimeout(r, 50)); 
-            if ((i + 1) % 15 === 0) {
+            if ((i + 1) % 15 === 0 && statusMsg) {
                 tgBot.editMessageText(`⏳ *Transmitting...*\n${createProgressBar(i+1, targets.length)}`, { chat_id: chatId, message_id: statusMsg.message_id, parse_mode: 'Markdown' }).catch(()=>{});
             }
         }
-        await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
-        return tgBot.sendMessage(chatId, `📢 *BOT BROADCAST REPORT*\n${DIVIDER}\n🎯 *Total Targets:* ${targets.length}\n✅ *Successful:* ${success}\n❌ *Failed/Blocked:* ${failed}\n${FOOTER}`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Back to Admin', callback_data: 'btn_admin_panel'}]] } });
+        if (statusMsg) await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
+        return safeSend(chatId, `📢 *BOT BROADCAST REPORT*\n${DIVIDER}\n🎯 *Total Targets:* ${targets.length}\n✅ *Successful:* ${success}\n❌ *Failed/Blocked:* ${failed}\n${FOOTER}`, { reply_markup: { inline_keyboard: [[{text: '🔙 Back to Admin', callback_data: 'btn_admin_panel'}]] } });
     }
 
     if (state.action && state.action.startsWith('WAIT_SEC_')) {
         if (state.action === 'WAIT_SEC_LINKS') {
-            const uClient = activeClients[userId]?.client;
-            if (!uClient) return tgBot.sendMessage(chatId, "⚠️ System requires authentication. Please log in first.");
+            const session = activeClients.get(userId);
+            const uClient = session ? session.client : null;
+            if (!uClient) return safeSend(chatId, "⚠️ System requires authentication. Please log in first.");
             const codes = [...text.matchAll(/(?:chat\.whatsapp\.com\/)([a-zA-Z0-9]{15,25})/gi)].map(m => m[1]);
-            if (codes.length === 0) return tgBot.sendMessage(chatId, "⚠️ No valid links detected in your message.");
+            if (codes.length === 0) return safeSend(chatId, "⚠️ No valid links detected in your message.");
             
-            let statusMsg = await tgBot.sendMessage(chatId, `⏳ *Securing Target Links...*`);
+            let statusMsg = await safeSend(chatId, `⏳ *Securing Target Links...*`);
             getSecurityConfig(userId).targetMode = 'LINKS';
             if(getSecurityConfig(userId).targetMode !== 'LINKS') getSecurityConfig(userId).targetGroups = []; 
 
@@ -949,7 +971,7 @@ tgBot.on('message', async (msg) => {
                     await new Promise(r=>setTimeout(r,1500));
                 } catch(e) {}
             }
-            tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
+            if (statusMsg) tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
             saveAdminConfig();
             state.action = null; 
             return sendShieldMenu(chatId, userId, null);
@@ -975,30 +997,30 @@ tgBot.on('message', async (msg) => {
             saveAdminConfig();
         }
         state.action = null;
-        return tgBot.sendMessage(chatId, `👑 Admin rights granted to \`${newAdmin}\`.`, { parse_mode: 'Markdown' });
+        return safeSend(chatId, `👑 Admin rights granted to \`${newAdmin}\`.`);
     }
     
     if (state.action === 'WAITING_FOR_FSUB_DATA') {
         const parts = text.split(/[\s|]+/).filter(p => p.trim() !== '');
         if (parts.length < 2 || !parts[1].startsWith('http')) {
-            return tgBot.sendMessage(chatId, `⚠️ Syntax Error! Please format like this:\n@ChannelID https://t.me/link`);
+            return safeSend(chatId, `⚠️ Syntax Error! Please format like this:\n@ChannelID https://t.me/link`);
         }
         adminConfig.fsubChannels.push({ id: parts[0], link: parts[1] });
         saveAdminConfig();
         state.action = null; 
-        return tgBot.sendMessage(chatId, `📢 Force Sub channel added successfully.`);
+        return safeSend(chatId, `📢 Force Sub channel added successfully.`);
     }
 
-    if (state.action === 'WAITING_FOR_ALLOW_ID') { adminConfig.allowedUsers.push(parseInt(text)); saveAdminConfig(); state.action = null; return tgBot.sendMessage(chatId, `✅ User successfully allowed.`); }
-    if (state.action === 'WAITING_FOR_REVOKE_ID') { adminConfig.allowedUsers = adminConfig.allowedUsers.filter(u => u !== parseInt(text)); saveAdminConfig(); state.action = null; return tgBot.sendMessage(chatId, `❌ Access successfully revoked.`); }
-    if (state.action === 'WAITING_FOR_BAN_ID') { adminConfig.bannedUsers.push(parseInt(text)); saveAdminConfig(); state.action = null; return tgBot.sendMessage(chatId, `🚫 User successfully banned.`); }
-    if (state.action === 'WAITING_FOR_UNBAN_ID') { adminConfig.bannedUsers = adminConfig.bannedUsers.filter(u => u !== parseInt(text)); saveAdminConfig(); state.action = null; return tgBot.sendMessage(chatId, `♻️ User successfully unbanned.`); }
+    if (state.action === 'WAITING_FOR_ALLOW_ID') { adminConfig.allowedUsers.push(parseInt(text)); saveAdminConfig(); state.action = null; return safeSend(chatId, `✅ User successfully allowed.`); }
+    if (state.action === 'WAITING_FOR_REVOKE_ID') { adminConfig.allowedUsers = adminConfig.allowedUsers.filter(u => u !== parseInt(text)); saveAdminConfig(); state.action = null; return safeSend(chatId, `❌ Access successfully revoked.`); }
+    if (state.action === 'WAITING_FOR_BAN_ID') { adminConfig.bannedUsers.push(parseInt(text)); saveAdminConfig(); state.action = null; return safeSend(chatId, `🚫 User successfully banned.`); }
+    if (state.action === 'WAITING_FOR_UNBAN_ID') { adminConfig.bannedUsers = adminConfig.bannedUsers.filter(u => u !== parseInt(text)); saveAdminConfig(); state.action = null; return safeSend(chatId, `♻️ User successfully unbanned.`); }
 
     if (state.action === 'WAITING_FOR_LOGIN_NUMBER') { state.action = null; return startWhatsAppClient(userId, chatId, text.replace(/[^0-9]/g, '')); }
-    if (state.action === 'WAIT_GROUP_NAME') { state.groupConfig.baseName = text.trim(); state.action = 'WAIT_GROUP_COUNT'; return tgBot.sendMessage(chatId, `🔢 *Phase 2:* Quantity?`, { reply_markup: { inline_keyboard: [[{text: '❌ Cancel', callback_data: 'btn_main_menu'}]] } }); } 
-    if (state.action === 'WAIT_GROUP_COUNT') { state.groupConfig.count = parseInt(text); state.action = 'WAIT_GROUP_MEMBER'; return tgBot.sendMessage(chatId, `👤 *Phase 3:* Member ID?`, { reply_markup: { inline_keyboard: [[{text: '❌ Cancel', callback_data: 'btn_main_menu'}]] } }); } 
-    if (state.action === 'WAIT_GROUP_MEMBER') { state.groupConfig.memberId = text.replace(/[^0-9]/g, '') + '@c.us'; state.action = 'WAIT_GROUP_DESC'; return tgBot.sendMessage(chatId, `📝 *Phase 4:* Desc?`, { reply_markup: { inline_keyboard: [[{text: '⏩ Skip', callback_data: 'grp_skip_desc'}], [{text: '❌ Cancel', callback_data: 'btn_main_menu'}]] } }); } 
-    if (state.action === 'WAIT_GROUP_DESC') { state.groupConfig.desc = text; state.action = 'WAIT_GROUP_PFP'; return tgBot.sendMessage(chatId, `🖼️ *Phase 5:* DP?`, { reply_markup: { inline_keyboard: [[{text: '⏩ Skip', callback_data: 'grp_skip_pfp'}], [{text: '❌ Cancel', callback_data: 'btn_main_menu'}]] } }); }
+    if (state.action === 'WAIT_GROUP_NAME') { state.groupConfig.baseName = text.trim(); state.action = 'WAIT_GROUP_COUNT'; return safeSend(chatId, `🔢 *Phase 2:* Quantity?`, { reply_markup: { inline_keyboard: [[{text: '❌ Cancel', callback_data: 'btn_main_menu'}]] } }); } 
+    if (state.action === 'WAIT_GROUP_COUNT') { state.groupConfig.count = parseInt(text); state.action = 'WAIT_GROUP_MEMBER'; return safeSend(chatId, `👤 *Phase 3:* Member ID?`, { reply_markup: { inline_keyboard: [[{text: '❌ Cancel', callback_data: 'btn_main_menu'}]] } }); } 
+    if (state.action === 'WAIT_GROUP_MEMBER') { state.groupConfig.memberId = text.replace(/[^0-9]/g, '') + '@c.us'; state.action = 'WAIT_GROUP_DESC'; return safeSend(chatId, `📝 *Phase 4:* Desc?`, { reply_markup: { inline_keyboard: [[{text: '⏩ Skip', callback_data: 'grp_skip_desc'}], [{text: '❌ Cancel', callback_data: 'btn_main_menu'}]] } }); } 
+    if (state.action === 'WAIT_GROUP_DESC') { state.groupConfig.desc = text; state.action = 'WAIT_GROUP_PFP'; return safeSend(chatId, `🖼️ *Phase 5:* DP?`, { reply_markup: { inline_keyboard: [[{text: '⏩ Skip', callback_data: 'grp_skip_pfp'}], [{text: '❌ Cancel', callback_data: 'btn_main_menu'}]] } }); }
     if (state.action === 'WAIT_GROUP_PFP') {
         if (msg.photo) {
             const fileId = msg.photo[msg.photo.length - 1].file_id;
@@ -1007,15 +1029,20 @@ tgBot.on('message', async (msg) => {
         }
     }
 
-    if (state.action === 'WAIT_KICK_TERM') { const uClient = activeClients[userId].client; return runPurgeEngine(chatId, userId, uClient, text); }
+    if (state.action === 'WAIT_KICK_TERM') { 
+        const session = activeClients.get(userId);
+        return runPurgeEngine(chatId, userId, session ? session.client : null, text); 
+    }
     
-    // 🔥 FIXED: WHATSAPP BROADCAST MEDIA SUPPORT 🔥
     if (state.action === 'WAIT_BROADCAST_MSG') {
-        const uClient = activeClients[userId].client; 
+        const session = activeClients.get(userId);
+        const uClient = session ? session.client : null; 
+        if (!uClient) return;
+
         const targets = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g=>g.id) : state.selectedGroupsArray;
         state.action = null; 
         
-        let statusMsg = await tgBot.sendMessage(chatId, `⏳ *Transmitting WhatsApp Broadcast...*`, { parse_mode: 'Markdown' });
+        let statusMsg = await safeSend(chatId, `⏳ *Transmitting WhatsApp Broadcast...*`);
         
         let mediaObj = null;
         let captionText = msg.caption || msg.text || '';
@@ -1049,22 +1076,21 @@ tgBot.on('message', async (msg) => {
                     await chat.sendMessage(captionText); 
                 }
                 success++;
-            } catch(e) { 
-                failed++; 
-            } 
+            } catch(e) { failed++; } 
             await new Promise(r => setTimeout(r, 1000));
         }
         
-        if (mediaObj && fs.existsSync(mediaObj.filePath)) {
-            fs.unlinkSync(mediaObj.filePath);
-        }
+        if (mediaObj && fs.existsSync(mediaObj.filePath)) fs.unlinkSync(mediaObj.filePath);
         
-        await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
-        return tgBot.sendMessage(chatId, `✅ *WA BROADCAST REPORT*\n${DIVIDER}\n🎯 Targets: ${targets.length}\n✔️ Success: ${success}\n❌ Failed: ${failed}`, { parse_mode: 'Markdown' });
+        if (statusMsg) await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
+        return safeSend(chatId, `✅ *WA BROADCAST REPORT*\n${DIVIDER}\n🎯 Targets: ${targets.length}\n✔️ Success: ${success}\n❌ Failed: ${failed}`);
     }
 
     if (state.action === 'WAIT_RENAME_DATA') {
-        const uClient = activeClients[userId].client; 
+        const session = activeClients.get(userId);
+        const uClient = session ? session.client : null;
+        if (!uClient) return;
+
         const blocks = text.split(/(?:https?:\/\/)?chat\.whatsapp\.com\/[a-zA-Z0-9]{15,25}/i);
         const codes = [...text.matchAll(/(?:https?:\/\/)?chat\.whatsapp\.com\/([a-zA-Z0-9]{15,25})/gi)].map(m => m[1]);
         if (codes.length === 0) return;
@@ -1084,7 +1110,10 @@ tgBot.on('message', async (msg) => {
     }
 
     if (state.action === 'WAIT_JOIN_LINKS') {
-        const uClient = activeClients[userId].client; 
+        const session = activeClients.get(userId);
+        const uClient = session ? session.client : null;
+        if (!uClient) return;
+
         const codes = [...text.matchAll(/(?:chat\.whatsapp\.com\/)([a-zA-Z0-9]{15,25})/gi)].map(m => m[1]);
         if (codes.length === 0) return;
         state.action = null; 
@@ -1101,13 +1130,14 @@ tgBot.on('message', async (msg) => {
 });
 
 // ============================================================================
-// ⚙️ 11. THE HEAVYWEIGHT ISOLATED ENGINES (FIXED DEMOTED ADMIN CRASH)
+// ⚙️ 11. THE HEAVYWEIGHT ISOLATED ENGINES
 // ============================================================================
 
 async function startGroupCreationProcess(chatId, userId, uClient) {
+    if (!uClient) return;
     const config = getState(userId).groupConfig; 
     getState(userId).action = null; 
-    let statusMsg = await tgBot.sendMessage(chatId, `🚀 *DEPLOYMENT ACTIVE*`, { parse_mode: 'Markdown' }); 
+    let statusMsg = await safeSend(chatId, `🚀 *DEPLOYMENT ACTIVE*`); 
     let resultMessage = `✅ *DEPLOYMENT REPORT*\n${DIVIDER}\n\n`;
     
     let pfpMedia = null;
@@ -1116,7 +1146,7 @@ async function startGroupCreationProcess(chatId, userId, uClient) {
     for (let i = 1; i <= config.count; i++) {
         const groupName = `${config.baseName} ${i}`;
         try {
-            await tgBot.editMessageText(`⚙️ *Constructing...*\n${createProgressBar(i, config.count)}`, { chat_id: chatId, message_id: statusMsg.message_id });
+            if (statusMsg) tgBot.editMessageText(`⚙️ *Constructing...*\n${createProgressBar(i, config.count)}`, { chat_id: chatId, message_id: statusMsg.message_id }).catch(()=>{});
             const res = await uClient.createGroup(groupName, [config.memberId]); 
             await new Promise(r => setTimeout(r, 2000)); 
             const chat = await uClient.getChatById(res.gid._serialized);
@@ -1132,25 +1162,25 @@ async function startGroupCreationProcess(chatId, userId, uClient) {
     }
     
     if (config.pfpPath && fs.existsSync(config.pfpPath)) fs.unlinkSync(config.pfpPath);
-    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
+    if (statusMsg) await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
     return sendLongReport(chatId, resultMessage + FOOTER, 'Created_Groups');
 }
 
 async function runPurgeEngine(chatId, userId, uClient, inputString) {
+    if (!uClient) return;
     const state = getState(userId); 
     const inputList = inputString.replace(/,/g, ' ').split(/\s+/).filter(p => p.trim() !== '');
     const targetGroupIds = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g => g.id) : state.selectedGroupsArray; 
     state.action = null; 
     
-    let statusMsg = await tgBot.sendMessage(chatId, `⏳ *PURGING...*`, { parse_mode: 'Markdown' }); 
+    let statusMsg = await safeSend(chatId, `⏳ *PURGING...*`); 
     let report = `✅ *PURGE REPORT*\n${DIVIDER}\n`;
 
     for (let i = 0; i < targetGroupIds.length; i++) {
         try {
             const chat = await uClient.getChatById(targetGroupIds[i]); 
-            await tgBot.editMessageText(`🔍 *Purging...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id });
+            if (statusMsg) tgBot.editMessageText(`🔍 *Purging...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id }).catch(()=>{});
             
-            // 🔥 DEMOTED ADMIN CHECK 🔥
             const botId = uClient.info.wid._serialized;
             const botParticipant = chat.participants.find(p => p.id._serialized === botId);
             if (!botParticipant || (!botParticipant.isAdmin && !botParticipant.isSuperAdmin)) {
@@ -1177,24 +1207,24 @@ async function runPurgeEngine(chatId, userId, uClient, inputString) {
         } catch (e) {}
     }
     
-    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
+    if (statusMsg) await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
     return sendLongReport(chatId, report + FOOTER, 'Purge_Report');
 }
 
 async function extractGroupLinksEngine(chatId, userId, uClient) {
+    if (!uClient) return;
     const state = getState(userId); 
     const targetGroupIds = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g => g.id) : state.selectedGroupsArray; 
     state.action = null; 
     
-    let statusMsg = await tgBot.sendMessage(chatId, `⏳ *SCRAPING LINKS...*`, { parse_mode: 'Markdown' }); 
+    let statusMsg = await safeSend(chatId, `⏳ *SCRAPING LINKS...*`); 
     let resultMessage = `🔗 *LINK DATABASE*\n${DIVIDER}\n\n`;
 
     for (let i = 0; i < targetGroupIds.length; i++) {
         try {
             const chat = await uClient.getChatById(targetGroupIds[i]); 
-            await tgBot.editMessageText(`🔍 *Extracting...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id });
+            if (statusMsg) tgBot.editMessageText(`🔍 *Extracting...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id }).catch(()=>{});
             
-            // 🔥 DEMOTED ADMIN CHECK 🔥
             const botId = uClient.info.wid._serialized;
             const botParticipant = chat.participants.find(p => p.id._serialized === botId);
             if (!botParticipant || (!botParticipant.isAdmin && !botParticipant.isSuperAdmin)) {
@@ -1208,24 +1238,24 @@ async function extractGroupLinksEngine(chatId, userId, uClient) {
         } catch (e) { resultMessage += `🔹 ID: ${targetGroupIds[i]} ❌\n\n`; }
     }
     
-    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
+    if (statusMsg) await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
     return sendLongReport(chatId, resultMessage + FOOTER, 'Extracted_Links');
 }
 
 async function autoApproveEngine(chatId, userId, uClient, mode) {
+    if (!uClient) return;
     const state = getState(userId); 
     const targetGroupIds = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g => g.id) : state.selectedGroupsArray; 
     state.action = null; 
     
-    let statusMsg = await tgBot.sendMessage(chatId, `⏳ *APPROVING...*`, { parse_mode: 'Markdown' }); 
+    let statusMsg = await safeSend(chatId, `⏳ *APPROVING...*`); 
     let report = `✅ *APPROVAL REPORT*\n${DIVIDER}\n`;
 
     for (let i = 0; i < targetGroupIds.length; i++) {
         try {
             const chat = await uClient.getChatById(targetGroupIds[i]); 
-            await tgBot.editMessageText(`👥 *Authorizing...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id });
+            if (statusMsg) tgBot.editMessageText(`👥 *Authorizing...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id }).catch(()=>{});
             
-            // 🔥 DEMOTED ADMIN CHECK 🔥
             const botId = uClient.info.wid._serialized;
             const botParticipant = chat.participants.find(p => p.id._serialized === botId);
             if (!botParticipant || (!botParticipant.isAdmin && !botParticipant.isSuperAdmin)) {
@@ -1248,7 +1278,7 @@ async function autoApproveEngine(chatId, userId, uClient, mode) {
         } catch (e) {}
     }
     
-    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
+    if (statusMsg) await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
     return sendLongReport(chatId, report + FOOTER, 'Approval_Report');
 }
 
@@ -1256,9 +1286,9 @@ async function autoApproveEngine(chatId, userId, uClient, mode) {
 // 🛑 12. GRACEFUL EXIT HANDLER
 // ============================================================================
 process.on('SIGINT', async () => {
-    for (let userId in activeClients) { 
-        if (activeClients[userId] && activeClients[userId].client) {
-            await activeClients[userId].client.destroy().catch(()=>{}); 
+    for (let [userId, session] of activeClients) { 
+        if (session && session.client) {
+            await session.client.destroy().catch(()=>{}); 
         }
     }
     process.exit(0);
