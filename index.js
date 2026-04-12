@@ -7,25 +7,30 @@ const express = require('express');
 // ============================================================================
 // 🛡️ 1. GLOBAL ANTI-CRASH SHIELD
 // ============================================================================
-process.on('uncaughtException', (err) => {
-    console.log('\n[ANTI-CRASH] Caught Exception:', err.message);
+process.on('uncaughtException', (err) => { 
+    console.log('\n[ANTI-CRASH] Caught Exception:', err.message); 
 });
-process.on('unhandledRejection', (reason) => {
-    console.log('\n[ANTI-CRASH] Unhandled Rejection:', reason);
+
+process.on('unhandledRejection', (reason) => { 
+    console.log('\n[ANTI-CRASH] Unhandled Rejection:', reason); 
 });
 
 // ============================================================================
-// ☁️ 2. CLOUD SERVER (ANTI-SLEEP)
+// ☁️ 2. CLOUD SERVER (ANTI-SLEEP FOR RAILWAY)
 // ============================================================================
 const app = express();
 const port = process.env.PORT || 3000; 
-app.get('/', (req, res) => {
-    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 Supreme Master V37.0 (The Fortress) Active</h1>');
+
+app.get('/', (req, res) => { 
+    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 Supreme Master V38.6 (Peak UX Edition) Active</h1>'); 
 });
-app.listen(port, () => console.log(`☁️ [SERVER] Web Interface Active on Port ${port}`));
+
+app.listen(port, () => {
+    console.log(`☁️ [SERVER] Web Interface Active on Port ${port}`);
+});
 
 // ============================================================================
-// ⚙️ 3. CORE CONFIGURATION (TURBO ENGINE UPGRADE)
+// ⚙️ 3. CORE CONFIGURATION
 // ============================================================================
 const TELEGRAM_TOKEN = '8709803495:AAHfunw8KiTsFooEwdXKAbvknr2kdRCFMOI'; // 👈 APNA TOKEN YAHAN DAALO
 const OWNER_ID = 5524906942; // 👈 APNI ASLI TELEGRAM ID YAHAN DAALO
@@ -33,35 +38,43 @@ const OWNER_USERNAME = '@Naimish555';
 
 const tgBot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
-// 🔥 FASTER LOADING FLAGS ADDED HERE
 const puppeteerOptions = {
     headless: true,
     args: [
         '--no-sandbox', 
         '--disable-setuid-sandbox', 
         '--disable-dev-shm-usage', 
-        '--single-process',
-        '--no-zygote',
-        '--disable-gpu',
-        '--no-first-run',
+        '--single-process', 
+        '--no-zygote', 
+        '--disable-gpu', 
+        '--no-first-run', 
         '--disable-accelerated-2d-canvas'
     ]
 };
 
 if (fs.existsSync('/data/data/com.termux/files/usr/bin/chromium-browser')) {
     puppeteerOptions.executablePath = '/data/data/com.termux/files/usr/bin/chromium-browser';
-    console.log('📱 [SYSTEM] Termux Environment Detected. Using Local Chromium.');
 }
 
-console.log(`\n🔥 SUPREME MASTER V37.0 (FORTRESS EDITION) INITIALIZING...\n`);
+console.log(`\n🔥 SUPREME MASTER V38.6 (PEAK UX) INITIALIZING...\n`);
 
 // ============================================================================
-// 🧠 4. MULTI-TENANT STATE MANAGEMENT & DB
+// 🧠 4. STATE MANAGEMENT & PERSISTENT DB
 // ============================================================================
 let userLanguage = 'Hinglish'; 
 const activeClients = {}; 
 let userStates = {}; 
 let knownBotUsers = [];
+
+// 🔥 SMART DATABASE LOAD (Railway Restart Proof)
+const BOT_USERS_FILE = './bot_users.json';
+if (fs.existsSync(BOT_USERS_FILE)) {
+    try { 
+        knownBotUsers = JSON.parse(fs.readFileSync(BOT_USERS_FILE)); 
+    } catch(e) {
+        console.error("Failed to load bot users DB:", e.message);
+    }
+}
 
 function getState(userId) {
     if (!userStates[userId]) {
@@ -73,8 +86,15 @@ function getState(userId) {
             selectedGroupsArray: [], 
             lastMsgId: null,
             groupConfig: { 
-                baseName: '', count: 0, memberId: '', desc: '', pfpPath: null, 
-                settings: { msgsAdminOnly: false, infoAdminOnly: false } 
+                baseName: '', 
+                count: 0, 
+                memberId: '', 
+                desc: '', 
+                pfpPath: null, 
+                settings: { 
+                    msgsAdminOnly: false, 
+                    infoAdminOnly: false 
+                } 
             }
         };
     }
@@ -90,6 +110,17 @@ let adminConfig = {
     admins: [], 
     allowedUsers: [], 
     bannedUsers: [],
+    securityConfig: { 
+        enabled: false, 
+        ruleType: 'WHITELIST', 
+        countries: ['91'], 
+        vipNumbers: [], 
+        autoKickEnabled: false, 
+        strikeCount: 3, 
+        violations: {}, 
+        targetMode: 'ALL', 
+        targetGroups: [] 
+    },
     featurePerms: { 
         login: ['owner','admin','user'], 
         creategroup: ['owner','admin','user'], 
@@ -99,26 +130,22 @@ let adminConfig = {
         approve: ['owner','admin','user'], 
         autokick: ['owner','admin','user'], 
         broadcast: ['owner','admin','user'], 
-        stats: ['owner','admin','user'] 
+        stats: ['owner','admin','user'], 
+        security: ['owner','admin'] 
     }
 };
 
 const DIVIDER = '━━━━━━━━━━━━━━━━━━━━';
-const FOOTER = `\n${DIVIDER}\n👑 _Supreme System v37.0_ | Owner: ${OWNER_USERNAME}`;
-
-// 🌐 MULTILINGUAL DICTIONARY
-const texts = {
-    English: { start: "Command Center", status: "WA Status", session: "Auth Session", autoGroup: "Mass Group Builder", join: "Auto-Join Links", kick: "Tactical Purge", stats: "My Analytics", lang: "Language", broadcast: "Global Broadcast", extract: "Scrape Links", approve: "Auto-Approve", rename: "Rename Groups" },
-    Hinglish: { start: "Supreme Command Center", status: "Aapka WA Status", session: "Auth Session (Login)", autoGroup: "Mass Group Builder", join: "Auto-Join via Links", kick: "Tactical Purge (Kick)", stats: "My Analytics", lang: "Bhasha", broadcast: "Global Broadcast", extract: "Scrape Invite Links", approve: "Auto-Approve", rename: "Rename Groups" },
-    Indonesian: { start: "Pusat Komando", status: "Status WA", session: "Sesi Auth (Login)", autoGroup: "Pembuat Grup Massal", join: "Gabung via Tautan", kick: "Pembersihan Taktis", stats: "Analitik Saya", lang: "Bahasa", broadcast: "Siaran Global", extract: "Ekstrak Tautan", approve: "Setujui Otomatis", rename: "Ubah Nama Grup" }
-};
+const FOOTER = `\n${DIVIDER}\n👑 _Supreme System v38.6_ | Owner: ${OWNER_USERNAME}`;
 
 // ============================================================================
 // 🛠️ 5. SYSTEM HELPERS
 // ============================================================================
 function createProgressBar(current, total) {
-    if (total === 0) return `[██████████] 100%`;
-    const length = 10;
+    if (total === 0) {
+        return `[██████████] 100%`;
+    }
+    const length = 10; 
     const filled = Math.round((current / total) * length);
     const empty = Math.max(0, length - filled);
     return `[${'█'.repeat(filled)}${'░'.repeat(empty)}] ${Math.round((current / total) * 100)}%`;
@@ -129,10 +156,14 @@ async function sendLongReport(chatId, text, filename, options = {}) {
         const filePath = path.join(__dirname, `${filename}_${chatId}.txt`);
         try { 
             fs.writeFileSync(filePath, text); 
-            await tgBot.sendDocument(chatId, filePath, { caption: `📄 *REPORT GENERATED*\n${FOOTER}`, parse_mode: 'Markdown', ...options }); 
+            await tgBot.sendDocument(chatId, filePath, { 
+                caption: `📄 *REPORT GENERATED*\n${FOOTER}`, 
+                parse_mode: 'Markdown', 
+                ...options 
+            }); 
             fs.unlinkSync(filePath); 
         } catch (e) {
-            console.error("Report failed:", e);
+            console.error("Report generation failed:", e);
         }
     } else { 
         tgBot.sendMessage(chatId, text, { parse_mode: 'Markdown', ...options }).catch(()=>{}); 
@@ -140,803 +171,944 @@ async function sendLongReport(chatId, text, filename, options = {}) {
 }
 
 async function checkAccess(userId, chatId, msgObj = null) {
-    if (!knownBotUsers.includes(userId)) {
-        knownBotUsers.push(userId);
+    // 🔥 SMART DATABASE SAVE (Universal User Tracking)
+    if (!knownBotUsers.includes(userId)) { 
+        knownBotUsers.push(userId); 
+        fs.writeFileSync(BOT_USERS_FILE, JSON.stringify(knownBotUsers));
+        
         if (adminConfig.botAlerts && msgObj) {
-            const alertMsg = `🚨 *NEW USER DETECTED*\n${DIVIDER}\n👤 *Name:* ${msgObj.from?.first_name || 'Unknown'}\n🔗 *Username:* ${msgObj.from?.username ? `@${msgObj.from.username}` : 'No Username'}\n🆔 *ID:* \`${userId}\`\n${FOOTER}`;
-            tgBot.sendMessage(OWNER_ID, alertMsg, { parse_mode: 'Markdown' }).catch(()=>{});
+            const userName = msgObj.from?.first_name || 'Unknown';
+            tgBot.sendMessage(OWNER_ID, `🚨 *NEW USER DETECTED*\n${DIVIDER}\n👤 *Name:* ${userName}\n🆔 *ID:* \`${userId}\`\n${FOOTER}`, { parse_mode: 'Markdown' }).catch(()=>{});
         }
     }
 
-    if (userId === OWNER_ID) return true;
-    if (adminConfig.bannedUsers.includes(userId)) {
-        tgBot.sendMessage(chatId, `🚫 *BANNED*\nAapko is system se block kar diya gaya hai.`, { parse_mode: 'Markdown' }).catch(()=>{});
-        return false;
+    if (userId === OWNER_ID || adminConfig.admins.includes(userId)) {
+        return true;
     }
-    if (adminConfig.admins.includes(userId)) return true;
-    
-    if (adminConfig.approvalRequired && !adminConfig.allowedUsers.includes(userId)) {
-        tgBot.sendMessage(chatId, `🔒 *ACCESS DENIED*\nYeh bot ek private system hai. Owner se permission lein.\n\n👤 *Owner:* ${OWNER_USERNAME}\n🆔 *Aapki ID:* \`${userId}\``, { parse_mode: 'Markdown' }).catch(()=>{});
-        return false;
+
+    if (adminConfig.bannedUsers.includes(userId)) { 
+        tgBot.sendMessage(chatId, `🚫 *BANNED*\nAap system use nahi kar sakte.`, { parse_mode: 'Markdown' }).catch(()=>{}); 
+        return false; 
     }
-    
-    if (adminConfig.fsubEnabled && adminConfig.fsubChannels.length > 0) {
-        for (let ch of adminConfig.fsubChannels) {
-            try {
-                const member = await tgBot.getChatMember(ch.id, userId);
-                if (member.status === 'left' || member.status === 'kicked') throw new Error("Not joined");
-            } catch (e) {
-                let fsubBtns = adminConfig.fsubChannels.map(c => ([{ text: `📢 Join ${c.id}`, url: c.link }]));
-                tgBot.sendMessage(chatId, `⚠️ *VERIFICATION REQUIRED*\nBot use karne ke liye niche diye gaye sabhi channels join karein.`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: fsubBtns } }).catch(()=>{});
-                return false;
-            }
-        }
+
+    if (adminConfig.approvalRequired && !adminConfig.allowedUsers.includes(userId)) { 
+        tgBot.sendMessage(chatId, `🔒 *ACCESS DENIED*\nAapke paas approval nahi hai.`, { parse_mode: 'Markdown' }).catch(()=>{}); 
+        return false; 
     }
+
     return true;
 }
 
-function getUserRole(userId) {
-    if (userId === OWNER_ID) return 'owner';
-    if (adminConfig.admins.includes(userId)) return 'admin';
-    return 'user';
-}
-
 function hasFeatureAccess(userId, featureKey) {
-    const role = getUserRole(userId);
+    let role = 'user';
+    
+    if (userId === OWNER_ID) {
+        role = 'owner';
+    } else if (adminConfig.admins.includes(userId)) {
+        role = 'admin';
+    }
+    
     return adminConfig.featurePerms[featureKey] && adminConfig.featurePerms[featureKey].includes(role);
 }
 
 // ============================================================================
-// 🚀 6. WHATSAPP CLIENT INITIALIZER (INSTANT AUTH & TURBO LOAD)
+// 🚀 6. WHATSAPP ENGINE (INSTANT AEGIS SHIELD INC.)
 // ============================================================================
 function startWhatsAppClient(userId, chatId, cleanNumber) {
     if (activeClients[userId] && activeClients[userId].status === 'initializing') {
-        return tgBot.sendMessage(chatId, `⚠️ Ek process already background me chal rahi hai. Kripya wait karein!`);
+        return tgBot.sendMessage(chatId, `⚠️ Process already running! Kripya wait karein.`);
     }
 
-    tgBot.sendMessage(chatId, `📡 *PHASE 1: Launching Turbo Engine...*\nTermux/Cloud engine start ho raha hai. Code aane me *15-30 seconds* lagenge.`, { parse_mode: 'Markdown' });
+    tgBot.sendMessage(chatId, `📡 *PHASE 1: Launching Turbo Engine...*`, { parse_mode: 'Markdown' });
     
-    let clientOpts = {
+    const clientOptions = { 
         authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), 
-        puppeteer: puppeteerOptions
+        puppeteer: puppeteerOptions 
     };
 
     if (cleanNumber) {
-        clientOpts.pairWithPhoneNumber = { phoneNumber: cleanNumber }; 
+        clientOptions.pairWithPhoneNumber = { phoneNumber: cleanNumber };
     }
 
-    const client = new Client(clientOpts);
+    const client = new Client(clientOptions);
     activeClients[userId] = { client: client, status: 'initializing', isReady: false };
 
-    client.on('qr', () => {
-        if (activeClients[userId] && activeClients[userId].status === 'initializing') {
-            tgBot.sendMessage(chatId, `📡 *PHASE 2: WhatsApp Web Loaded!*\nGenerating your secure pairing code now...`, { parse_mode: 'Markdown' });
-        }
+    client.on('code', (code) => { 
+        tgBot.sendMessage(chatId, `✅ *PAIRING CODE:*\nNumber: +${cleanNumber}\nToken: \`${code}\``, { parse_mode: 'Markdown' }); 
     });
 
-    client.on('code', (code) => {
-        if (activeClients[userId] && activeClients[userId].status === 'initializing') {
-            tgBot.sendMessage(chatId, `✅ *YOUR PAIRING CODE:*\n\nNumber: +${cleanNumber}\nToken: \`${code}\`\n\n_Isey apne WhatsApp "Linked Devices" > "Link with phone number" me dalein._`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Main Menu', callback_data: 'btn_main_menu'}]] } });
-        }
-    });
-
-    // 🔥 NEW: INSTANT AUTHENTICATED TRIGGER (Fixes the Offline Loophole)
-    client.on('authenticated', () => {
-        if (activeClients[userId]) {
-            activeClients[userId].isReady = true; // FORCE ENGINE ONLINE IMMEDIATELY
-            activeClients[userId].status = 'connected';
-            tgBot.sendMessage(chatId, `✅ *INSTANT AUTH SUCCESS!*\nWhatsApp verify ho gaya hai. System Online!\nType /start to access your dashboard.`, { parse_mode: 'Markdown' }).catch(()=>{});
-        }
-    });
-    
-    client.on('ready', () => { 
-        if (activeClients[userId] && !activeClients[userId].isReady) {
+    client.on('authenticated', () => { 
+        if (activeClients[userId]) { 
             activeClients[userId].isReady = true; 
-            activeClients[userId].status = 'connected';
-            tgBot.sendMessage(chatId, `🟢 *SUCCESS: Chat Synchronization Complete!*\nType /start to access your dashboard.`, { parse_mode: 'Markdown' }); 
+            activeClients[userId].status = 'connected'; 
+            tgBot.sendMessage(chatId, `✅ *INSTANT AUTH SUCCESS!*\nType /start to access dashboard.`, { parse_mode: 'Markdown' }); 
+        } 
+    });
+
+    client.on('ready', () => { 
+        if (activeClients[userId]) { 
+            activeClients[userId].isReady = true; 
+            activeClients[userId].status = 'connected'; 
+        } 
+    });
+
+    client.on('disconnected', (reason) => { 
+        tgBot.sendMessage(chatId, `⚠️ *WhatsApp Disconnected!*\nReason: ${reason}`); 
+        delete activeClients[userId]; 
+    });
+
+    // INSTANT-KILL AEGIS SHIELD EXECUTION (< 1 SEC)
+    client.on('message', async (msg) => {
+        const sec = adminConfig.securityConfig;
+        
+        if (!sec.enabled) {
+            return; 
         }
-    });
 
-    client.on('disconnected', (reason) => {
-        console.log(`[USER ${userId}] WA Disconnected/Banned:`, reason);
-        tgBot.sendMessage(chatId, `⚠️ *WhatsApp Disconnected! (Ban or Logout)*\nReason: ${reason}\nYour session has been destroyed.`, { parse_mode: 'Markdown' }).catch(()=>{});
-        delete activeClients[userId];
-    });
-
-    client.on('group_join', async (notification) => {
-        if (!adminConfig.welcomeEnabled) return;
         try {
-            const chat = await client.getChatById(notification.chatId);
-            for (let participant of notification.recipientIds) {
-                if (participant === client.info.wid._serialized) continue; 
-                
-                const contact = await client.getContactById(participant);
-                const userNum = participant.split('@')[0];
-                const welcomeMsg = `👋 *WELCOME TO THE ZONE*\n${DIVIDER}\n👤 @${userNum}\n🎯 Group: ${chat.name}\n${DIVIDER}`;
-                
-                await chat.sendStateTyping(); 
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                await chat.sendMessage(welcomeMsg, { mentions: [contact] }).catch(()=>{});
+            const chatGid = msg.from; 
+            
+            if (!chatGid.endsWith('@g.us')) {
+                return; // Only works in groups
             }
-        } catch (error) {}
+            
+            // TARGET VERIFICATION
+            if (sec.targetMode !== 'ALL' && !sec.targetGroups.includes(chatGid)) {
+                return;
+            }
+
+            const authorId = msg.author; 
+            
+            if (!authorId) {
+                return;
+            }
+
+            const authorNum = authorId.split('@')[0];
+            
+            // VIP IMMUNITY
+            if (sec.vipNumbers.includes(authorNum)) {
+                return;
+            }
+            
+            // RULE MATCHING LOGIC
+            let shouldDelete = false;
+            let matchedCode = sec.countries.find(c => authorNum.startsWith(c));
+            
+            if (sec.ruleType === 'WHITELIST') { 
+                if (sec.countries.length > 0 && !matchedCode) {
+                    shouldDelete = true; 
+                }
+            } else if (sec.ruleType === 'BLACKLIST') { 
+                if (matchedCode) {
+                    shouldDelete = true; 
+                }
+            }
+
+            if (!shouldDelete) {
+                return; // Normal message, do nothing
+            }
+
+            // PERMISSION VERIFICATION
+            const chat = await msg.getChat();
+            const botId = client.info.wid._serialized;
+            const botParticipant = chat.participants.find(p => p.id._serialized === botId);
+            
+            if (!botParticipant || (!botParticipant.isAdmin && !botParticipant.isSuperAdmin)) {
+                return; // Bot doesn't have power to delete
+            }
+
+            const authPart = chat.participants.find(p => p.id._serialized === authorId);
+            if (authPart && (authPart.isAdmin || authPart.isSuperAdmin)) {
+                return; // Author is admin immunity
+            }
+
+            // 🔥 FIRE & FORGET PROTOCOL
+            msg.delete(true).catch(()=>{}); 
+            
+            // GHOST LOGGING & AUTO-KICK SYSTEM
+            let msgContent = msg.hasMedia ? '[MEDIA / STICKER]' : msg.body;
+            
+            if (!sec.violations[authorId]) {
+                sec.violations[authorId] = 0;
+            }
+            sec.violations[authorId] += 1;
+            
+            const strikes = sec.violations[authorId];
+
+            if (strikes >= sec.strikeCount && sec.autoKickEnabled) {
+                chat.removeParticipants([authorId]).catch(()=>{}); 
+                tgBot.sendMessage(OWNER_ID, `⚔️ *AEGIS PURGE EXECUTED*\n${DIVIDER}\n🎯 Group: ${chat.name}\n💀 Target: +${authorNum}\n⚠️ Reason: ${strikes} Strikes Reached. Permanently Kicked.`, { parse_mode: 'Markdown' }).catch(()=>{});
+                sec.violations[authorId] = 0; 
+            } else {
+                let sWarn = sec.autoKickEnabled ? `⚠️ Strike: ${strikes}/${sec.strikeCount}` : `⚠️ Strike: ${strikes} (Auto-Kick OFF)`;
+                tgBot.sendMessage(OWNER_ID, `🛡️ *SHIELD ALERT: NUKED IN < 1s*\n${DIVIDER}\n🎯 Group: ${chat.name}\n👤 Sender: +${authorNum}\n📄 Msg: _"${msgContent}"_\n${sWarn}\n💥 Action: Instantly Deleted`, { parse_mode: 'Markdown' }).catch(()=>{});
+            }
+        } catch (e) {
+            // Fails silently to maintain high-speed execution
+        }
     });
 
     client.initialize().catch(e => { 
-        tgBot.sendMessage(chatId, `❌ Initialization Error: ${e.message}\nPlease restart the process.`); 
         delete activeClients[userId]; 
     });
 }
 
-// Auto-Resume
+// AUTO-RESUME EXISTING SESSIONS
 if (fs.existsSync('./multi_sessions')) {
     fs.readdirSync('./multi_sessions').forEach(dir => {
-        if (dir.startsWith('session-user_')) {
+        if (dir.startsWith('session-user_')) { 
             const userId = dir.split('session-user_')[1];
-            const client = new Client({
-                authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), 
-                puppeteer: puppeteerOptions
-            });
-            activeClients[userId] = { client: client, status: 'resuming', isReady: false };
-            
-            client.on('authenticated', () => {
-                if (activeClients[userId]) { activeClients[userId].isReady = true; activeClients[userId].status = 'connected'; }
-            });
-            client.on('ready', () => {
-                if (activeClients[userId]) { activeClients[userId].isReady = true; activeClients[userId].status = 'connected'; }
-            });
-            client.initialize().catch(()=>{});
+            startWhatsAppClient(userId, OWNER_ID, null); 
         }
     });
 }
 
 // ============================================================================
-// 🛡️ 7. ADMIN PANEL (UNCUT FULL LOGIC WITH NOTIFICATIONS)
+// 🛡️ 7. PANELS & MENUS
 // ============================================================================
-tgBot.onText(/\/admin/, async (msg) => {
-    const userId = msg.from.id;
-    const chatId = msg.chat.id;
-    if (!(await checkAccess(userId, chatId, msg))) return;
-    if (userId !== OWNER_ID && !adminConfig.admins.includes(userId)) return; 
-    sendAdminPanel(chatId, userId);
-});
-
 function sendAdminPanel(chatId, userId) {
     getState(userId).action = null;
-    const fsubStatus = adminConfig.fsubEnabled ? '🟢 ON' : '🔴 OFF';
-    const appStatus = adminConfig.approvalRequired ? '🟢 ON' : '🔴 OFF';
-    const alertStatus = adminConfig.botAlerts ? '🟢 ON' : '🔴 OFF';
-    const role = userId === OWNER_ID ? '👑 OVERLORD' : '🛡️ SYSTEM ADMIN';
-
-    const adminMsg = `🛡️ *SUPREME ADMIN PANEL*\n${DIVIDER}\nWelcome ${role}. Manage your SaaS parameters below:\n\n` +
-                     `👨‍💻 *Total Admins:* ${adminConfig.admins.length}\n` +
-                     `📺 *Force Sub Channels:* ${adminConfig.fsubChannels.length}\n` +
-                     `👥 *Allowed Users:* ${adminConfig.allowedUsers.length}\n` +
-                     `🤖 *Total Bot Users:* ${knownBotUsers.length}\n` +
-                     `🚫 *Banned Users:* ${adminConfig.bannedUsers.length}\n`;
-
+    
     let adminKeyboard = {
         inline_keyboard: [
-            [{ text: `📢 Force Sub: ${fsubStatus}`, callback_data: 'admin_toggle_fsub' }, { text: `🔒 Approval: ${appStatus}`, callback_data: 'admin_toggle_approval' }],
-            [{ text: `🔔 New User Alerts: ${alertStatus}`, callback_data: 'admin_toggle_alerts' }],
-            [{ text: '✅ Allow User', callback_data: 'admin_allow_user' }, { text: '❌ Revoke User', callback_data: 'admin_revoke_user' }],
-            [{ text: '➕ Add Admin 👑', callback_data: 'admin_add_admin' }, { text: '➖ Manage Admins 👑', callback_data: 'admin_manage_admins' }],
-            [{ text: '➕ Add F-Sub 👑', callback_data: 'admin_add_fsub' }, { text: '➖ Manage F-Subs 👑', callback_data: 'admin_manage_fsubs' }],
-            [{ text: '🚫 Ban User 👑', callback_data: 'admin_ban_user' }, { text: '♻️ Unban User 👑', callback_data: 'admin_unban_user' }]
+            [{ text: `📢 BROADCAST TO BOT USERS (${knownBotUsers.length})`, callback_data: 'admin_bot_broadcast' }],
+            
+            [{ text: `📢 Force Sub: ${adminConfig.fsubEnabled ? 'ON' : 'OFF'}`, callback_data: 'admin_toggle_fsub' }, 
+             { text: `🔒 Approval: ${adminConfig.approvalRequired ? 'ON' : 'OFF'}`, callback_data: 'admin_toggle_approval' }],
+            
+            [{ text: `🔔 Alerts: ${adminConfig.botAlerts ? 'ON' : 'OFF'}`, callback_data: 'admin_toggle_alerts' }],
+            
+            [{ text: '✅ Allow User', callback_data: 'admin_allow_user' }, 
+             { text: '❌ Revoke', callback_data: 'admin_revoke_user' }],
+            
+            [{ text: '🚫 Ban User', callback_data: 'admin_ban_user' }, 
+             { text: '♻️ Unban', callback_data: 'admin_unban_user' }],
+            
+            [{ text: '⚙️ Feature Perms', callback_data: 'admin_feature_permissions' }],
+            
+            [{ text: '🔙 Back', callback_data: 'btn_main_menu' }]
         ]
     };
     
-    if (userId === OWNER_ID) {
-        adminKeyboard.inline_keyboard.push([{ text: '⚙️ Feature Access Permissions 👑', callback_data: 'admin_feature_permissions' }]);
-    }
-    adminKeyboard.inline_keyboard.push([{ text: '🔙 Back to Bot Panel', callback_data: 'btn_main_menu' }]);
-
-    tgBot.sendMessage(chatId, adminMsg, { parse_mode: 'Markdown', reply_markup: adminKeyboard }).then(sent => getState(userId).lastMsgId = sent.message_id).catch(()=>{});
-}
-
-// ============================================================================
-// 🎮 8. MAIN UI DASHBOARD
-// ============================================================================
-function sendMainMenu(chatId, userId) {
-    getState(userId).action = null; 
-    const t = texts[userLanguage] || texts['Hinglish'];
-    const isReady = activeClients[userId] && activeClients[userId].isReady;
-    
-    let inlineKeyboard = [];
-    
-    if (!isReady && hasFeatureAccess(userId, 'login')) {
-        inlineKeyboard.push([{ text: `🔐 ${t.session}`, callback_data: 'menu_login' }]);
-    }
-    
-    let row1 = [], row2 = [], row3 = [], row4 = [];
-    
-    if (hasFeatureAccess(userId, 'creategroup')) row1.push({ text: `➕ ${t.autoGroup}`, callback_data: 'menu_creategroup' });
-    if (hasFeatureAccess(userId, 'joingroup')) row1.push({ text: `📥 ${t.join}`, callback_data: 'menu_joingroup' });
-    if (row1.length > 0) inlineKeyboard.push(row1);
-
-    if (hasFeatureAccess(userId, 'renamegroups')) row2.push({ text: `✏️ ${t.rename}`, callback_data: 'menu_rename_groups' });
-    if (hasFeatureAccess(userId, 'extractlinks')) row2.push({ text: `🔗 ${t.extract}`, callback_data: 'menu_extractlinks' });
-    if (row2.length > 0) inlineKeyboard.push(row2);
-
-    if (hasFeatureAccess(userId, 'approve')) row3.push({ text: `👥 ${t.approve}`, callback_data: 'menu_approve' });
-    if (hasFeatureAccess(userId, 'autokick')) row3.push({ text: `⚔️ ${t.kick}`, callback_data: 'menu_autokick' });
-    if (row3.length > 0) inlineKeyboard.push(row3);
-
-    if (hasFeatureAccess(userId, 'broadcast')) row4.push({ text: `📢 ${t.broadcast}`, callback_data: 'menu_broadcast' });
-    if (hasFeatureAccess(userId, 'stats')) row4.push({ text: `📊 ${t.stats}`, callback_data: 'menu_stats' });
-    if (row4.length > 0) inlineKeyboard.push(row4);
-
-    inlineKeyboard.push([{ text: `🌐 ${t.lang}: ${userLanguage}`, callback_data: 'menu_toggle_lang' }]);
-
-    if (userId === OWNER_ID || adminConfig.admins.includes(userId)) {
-        inlineKeyboard.push([{ text: `🛡️ Open Admin Panel`, callback_data: 'btn_admin_panel' }]);
-    }
-
-    if (inlineKeyboard.length === 0) {
-        inlineKeyboard.push([{ text: '🚫 No Features Assigned to your Role', callback_data: 'none' }]);
-    }
-
-    const menuText = `🤖 *${t.start.toUpperCase()}* \n${DIVIDER}\n📡 Status: ${isReady ? '🟢 Engine Active & Connected' : '🔴 Engine Offline / Needs Auth'}${FOOTER}`;
-    
-    tgBot.sendMessage(chatId, menuText, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: inlineKeyboard } }).then(sent => {
-        getState(userId).lastMsgId = sent.message_id;
+    tgBot.sendMessage(chatId, `🛡️ *ADMIN PANEL*\nTotal System Users: ${knownBotUsers.length}`, { 
+        parse_mode: 'Markdown', 
+        reply_markup: adminKeyboard 
     }).catch(()=>{});
 }
 
-tgBot.onText(/\/start/, async (msg) => {
-    if (!(await checkAccess(msg.from.id, msg.chat.id, msg))) return;
-    sendMainMenu(msg.chat.id, msg.from.id);
+function sendShieldMenu(chatId, userId, msgId = null) {
+    const sec = adminConfig.securityConfig;
+    
+    let targetText = '🌐 ALL GROUPS';
+    if (sec.targetMode === 'SELECTED') {
+        targetText = `🎯 SELECTED (${sec.targetGroups.length})`;
+    } else if (sec.targetMode === 'LINKS') {
+        targetText = `🔗 VIA LINKS (${sec.targetGroups.length})`;
+    }
+
+    const txt = `🛡️ *AEGIS SHIELD CONTROL ROOM*\n${DIVIDER}\n` +
+                `*Master Power:* ${sec.enabled ? '🟢 ONLINE' : '🔴 OFFLINE'}\n` +
+                `*Target Scope:* ${targetText}\n` +
+                `*Rules Mode:* ${sec.ruleType === 'WHITELIST' ? '🟢 WHO CAN MSG (Whitelist)' : '🔴 BAN COUNTRIES (Blacklist)'}\n` +
+                `*Auto-Kick (3 Strikes):* ${sec.autoKickEnabled ? '⚡ ON' : '⏸️ OFF'}\n\n` +
+                `🌐 *Countries:* ${sec.countries.length > 0 ? sec.countries.join(', ') : 'None'}\n` +
+                `👤 *VIP Numbers:* ${sec.vipNumbers.length > 0 ? sec.vipNumbers.join(', ') : 'None'}\n`;
+    
+    const kb = { 
+        inline_keyboard: [
+            [{ text: `🛡️ Shield Power: ${sec.enabled ? 'TURN OFF' : 'TURN ON'}`, callback_data: 'sec_toggle_power' }],
+            [{ text: `🎯 TARGET SCOPE: ${sec.targetMode}`, callback_data: 'sec_menu_targets' }],
+            [{ text: `🔄 Change Mode to ${sec.ruleType === 'WHITELIST' ? 'BLACKLIST' : 'WHITELIST'}`, callback_data: 'sec_toggle_mode' }],
+            [{ text: `⚡ Auto-Kick: ${sec.autoKickEnabled ? '🟢 ON' : '🔴 OFF'}`, callback_data: 'sec_toggle_autokick' }],
+            [{ text: `➕ Add Country Code`, callback_data: 'sec_add_country' }, { text: `➖ Remove Country`, callback_data: 'sec_rem_country' }],
+            [{ text: `➕ Add VIP Number`, callback_data: 'sec_add_vip' }, { text: `➖ Remove VIP`, callback_data: 'sec_rem_vip' }],
+            [{ text: '🔙 Back to Menu', callback_data: 'btn_main_menu' }]
+        ]
+    };
+
+    if (msgId) {
+        tgBot.editMessageText(txt, { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown', reply_markup: kb }).catch(()=>{});
+    } else {
+        tgBot.sendMessage(chatId, txt, { parse_mode: 'Markdown', reply_markup: kb });
+    }
+}
+
+function sendMainMenu(chatId, userId) {
+    getState(userId).action = null; 
+    const isReady = activeClients[userId] && activeClients[userId].isReady;
+    let inlineKeyboard = [];
+    
+    if (!isReady && hasFeatureAccess(userId, 'login')) {
+        inlineKeyboard.push([{ text: `🔐 Auth Session`, callback_data: 'menu_login' }]);
+    }
+    
+    let row1 = [];
+    let row2 = [];
+    let row3 = [];
+    let row4 = [];
+    
+    if (hasFeatureAccess(userId, 'creategroup')) {
+        row1.push({ text: `➕ Mass Group`, callback_data: 'menu_creategroup' });
+    }
+    if (hasFeatureAccess(userId, 'joingroup')) {
+        row1.push({ text: `📥 Auto-Join`, callback_data: 'menu_joingroup' });
+    }
+    if (row1.length > 0) {
+        inlineKeyboard.push(row1);
+    }
+    
+    if (hasFeatureAccess(userId, 'renamegroups')) {
+        row2.push({ text: `✏️ Rename Groups`, callback_data: 'menu_rename_groups' });
+    }
+    if (hasFeatureAccess(userId, 'extractlinks')) {
+        row2.push({ text: `🔗 Extract Links`, callback_data: 'menu_extractlinks' });
+    }
+    if (row2.length > 0) {
+        inlineKeyboard.push(row2);
+    }
+    
+    if (hasFeatureAccess(userId, 'approve')) {
+        row3.push({ text: `👥 Auto-Approve`, callback_data: 'menu_approve' });
+    }
+    if (hasFeatureAccess(userId, 'autokick')) {
+        row3.push({ text: `⚔️ Tactical Purge`, callback_data: 'menu_autokick' });
+    }
+    if (row3.length > 0) {
+        inlineKeyboard.push(row3);
+    }
+    
+    if (hasFeatureAccess(userId, 'broadcast')) {
+        row4.push({ text: `📢 WhatsApp Broadcast`, callback_data: 'menu_broadcast' });
+    }
+    if (hasFeatureAccess(userId, 'stats')) {
+        row4.push({ text: `📊 Stats`, callback_data: 'menu_stats' });
+    }
+    if (row4.length > 0) {
+        inlineKeyboard.push(row4);
+    }
+    
+    if (hasFeatureAccess(userId, 'security')) {
+        inlineKeyboard.push([{ text: `🛡️ Aegis Shield`, callback_data: 'menu_security' }]);
+    }
+    
+    if (userId === OWNER_ID) {
+        inlineKeyboard.push([{ text: `⚙️ Admin Panel (Bot Users)`, callback_data: 'btn_admin_panel' }]);
+    }
+    
+    const menuText = `🤖 *COMMAND CENTER* \n${DIVIDER}\n📡 Status: ${isReady ? '🟢 Engine Active' : '🔴 Engine Offline'}${FOOTER}`;
+    tgBot.sendMessage(chatId, menuText, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: inlineKeyboard } }).catch(()=>{});
+}
+
+tgBot.onText(/\/start/, async (msg) => { 
+    if (await checkAccess(msg.from.id, msg.chat.id, msg)) {
+        sendMainMenu(msg.chat.id, msg.from.id); 
+    }
+});
+
+tgBot.onText(/\/admin/, async (msg) => { 
+    if (await checkAccess(msg.from.id, msg.chat.id, msg)) {
+        if (msg.from.id === OWNER_ID || adminConfig.admins.includes(msg.from.id)) {
+            sendAdminPanel(msg.chat.id, msg.from.id);
+        }
+    }
 });
 
 // ============================================================================
-// ⌨️ 9. CALLBACK QUERIES (THE FULL UNCUT SWITCHBOARD)
+// ⌨️ 9. CALLBACK QUERIES
 // ============================================================================
 tgBot.on('callback_query', async (query) => {
-    const chatId = query.message.chat.id;
-    const userId = query.from.id;
-    const data = query.data;
+    const chatId = query.message.chat.id; 
+    const userId = query.from.id; 
+    const data = query.data; 
     const state = getState(userId);
     const uClient = activeClients[userId] ? activeClients[userId].client : null;
+    
+    if (!(await checkAccess(userId, chatId, query))) {
+        return;
+    }
 
-    if (!data.startsWith('admin_') && !data.startsWith('perm_') && !data.startsWith('btn_') && !data.startsWith('rem_') && !(await checkAccess(userId, chatId, query))) return;
-    tgBot.sendChatAction(chatId, 'typing').catch(()=>{});
-
-    if (data === 'btn_main_menu' || data === 'btn_cancel') { 
+    if (data === 'btn_main_menu') { 
         tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{}); 
         return sendMainMenu(chatId, userId); 
     }
-    if (data === 'btn_admin_panel') {
-        tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{});
-        return sendAdminPanel(chatId, userId);
+    
+    if (data === 'btn_admin_panel') { 
+        tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{}); 
+        return sendAdminPanel(chatId, userId); 
     }
     
-    // 🌐 MULTILINGUAL TOGGLE LOGIC
-    if (data === 'menu_toggle_lang') { 
-        if (userLanguage === 'Hinglish') userLanguage = 'English';
-        else if (userLanguage === 'English') userLanguage = 'Indonesian';
-        else userLanguage = 'Hinglish';
+    // 🔥 BOT USER BROADCAST TRIGGER
+    if (data === 'admin_bot_broadcast') {
+        state.action = 'WAIT_BOT_BROADCAST_MSG';
+        return tgBot.editMessageText(`📢 *UNIVERSAL BOT BROADCAST*\n\nSend your payload (Text, Image, Video, File) below.\nTotal Target Users: ${knownBotUsers.length}`, { 
+            chat_id: chatId, 
+            message_id: query.message.message_id, 
+            parse_mode: 'Markdown', 
+            reply_markup: { inline_keyboard: [[{text: '🔙 Abort', callback_data: 'btn_admin_panel'}]] } 
+        });
+    }
+
+    // SHIELD TARGETS MENU
+    if (data === 'sec_menu_targets') {
+        const kb = { 
+            inline_keyboard: [
+                [{ text: `🌐 Apply to ALL GROUPS`, callback_data: 'sec_tgt_all' }],
+                [{ text: `🎯 SELECT FROM LIST`, callback_data: 'sec_tgt_select' }],
+                [{ text: `🔗 APPLY VIA INVITE LINKS`, callback_data: 'sec_tgt_links' }],
+                [{ text: `🔙 Back to Shield`, callback_data: 'menu_security' }]
+            ]
+        };
+        return tgBot.editMessageText(`🎯 *SHIELD TARGET SELECTION*\nKaunse groups par security lagani hai?`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: kb });
+    }
+
+    if (data === 'sec_tgt_all') { 
+        adminConfig.securityConfig.targetMode = 'ALL'; 
+        adminConfig.securityConfig.targetGroups = []; 
+        return sendShieldMenu(chatId, userId, query.message.message_id); 
+    }
+
+    if (data === 'sec_tgt_links') { 
+        state.action = 'WAIT_SEC_LINKS'; 
+        return tgBot.editMessageText(`🔗 *SHIELD VIA LINKS*\nSend WhatsApp invite links:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
+    }
+
+    if (data === 'sec_tgt_select') {
+        if (!uClient || !uClient.info) {
+            return tgBot.answerCallbackQuery(query.id, { text: "⚠️ Engine Offline!", show_alert: true });
+        }
         
-        tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{});
-        return sendMainMenu(chatId, userId); 
-    }
-
-    // --- ADMIN COMMANDS ---
-    if (data.startsWith('admin_')) {
-        const ownerOnlyCommands = ['admin_ban_user', 'admin_unban_user', 'admin_add_admin', 'admin_manage_admins', 'admin_add_fsub', 'admin_manage_fsubs'];
-        if (ownerOnlyCommands.includes(data) && userId !== OWNER_ID) {
-            return tgBot.answerCallbackQuery(query.id, { text: '⚠️ Owner Authority Required!', show_alert: true });
-        }
-
-        if (data === 'admin_toggle_fsub') { adminConfig.fsubEnabled = !adminConfig.fsubEnabled; }
-        else if (data === 'admin_toggle_approval') { adminConfig.approvalRequired = !adminConfig.approvalRequired; }
-        else if (data === 'admin_toggle_alerts') { adminConfig.botAlerts = !adminConfig.botAlerts; }
-        else if (data === 'admin_allow_user') {
-            state.action = 'WAITING_FOR_ALLOW_ID';
-            return tgBot.editMessageText(`✅ *ALLOW USER*\nProvide Telegram ID to grant access:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Back', callback_data: 'btn_admin_panel'}]] } });
-        }
-        else if (data === 'admin_revoke_user') {
-            state.action = 'WAITING_FOR_REVOKE_ID';
-            return tgBot.editMessageText(`❌ *REVOKE USER*\nProvide Telegram ID to revoke access:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Back', callback_data: 'btn_admin_panel'}]] } });
-        }
-        else if (data === 'admin_ban_user') {
-            state.action = 'WAITING_FOR_BAN_ID';
-            return tgBot.editMessageText(`🚫 *BAN USER*\nProvide Telegram ID to execute global ban:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Back', callback_data: 'btn_admin_panel'}]] } });
-        }
-        else if (data === 'admin_unban_user') {
-            state.action = 'WAITING_FOR_UNBAN_ID';
-            return tgBot.editMessageText(`♻️ *UNBAN USER*\nProvide Telegram ID to unban:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Back', callback_data: 'btn_admin_panel'}]] } });
-        }
-        else if (data === 'admin_add_admin') {
-            state.action = 'WAITING_FOR_ADMIN_ID';
-            return tgBot.editMessageText(`👑 *ADD SUB-ADMIN*\nProvide new Admin's Telegram ID:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Back', callback_data: 'btn_admin_panel'}]] } });
-        }
-        else if (data === 'admin_add_fsub') {
-            state.action = 'WAITING_FOR_FSUB_DATA';
-            return tgBot.editMessageText(`📢 *ADD FORCE SUB CHANNEL*\nFormat:\n\`@ChannelID | https://link.com\``, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Back', callback_data: 'btn_admin_panel'}]] } });
-        }
-        else if (data === 'admin_manage_admins') {
-            let kb = adminConfig.admins.map(id => ([{ text: `❌ Remove Admin: ${id}`, callback_data: `rem_admin_${id}` }]));
-            kb.push([{ text: '🔙 Back', callback_data: 'btn_admin_panel' }]);
-            return tgBot.editMessageText(`👥 *MANAGE ADMINS*\nClick to revoke rights:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: kb } });
-        }
-        else if (data === 'admin_manage_fsubs') {
-            let kb = adminConfig.fsubChannels.map(ch => ([{ text: `❌ Remove: ${ch.id}`, callback_data: `rem_fsub_${ch.id}` }]));
-            kb.push([{ text: '🔙 Back', callback_data: 'btn_admin_panel' }]);
-            return tgBot.editMessageText(`📺 *MANAGE FORCE SUBS*\nClick to remove channel:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: kb } });
-        }
-        else if (data === 'admin_feature_permissions') {
-            const msg = `⚙️ *FEATURE ACCESS CONTROL*\nKis feature ko kaun use kar sakta hai?`;
-            const kb = { inline_keyboard: [ [{ text: '🔐 Login Auth', callback_data: 'perm_feat_login' }], [{ text: '➕ Auto Group', callback_data: 'perm_feat_creategroup' }, { text: '📥 Join Group', callback_data: 'perm_feat_joingroup' }], [{ text: '✏️ Rename Groups', callback_data: 'perm_feat_renamegroups' }, { text: '🔗 Extract Links', callback_data: 'perm_feat_extractlinks' }], [{ text: '👥 Auto Approve', callback_data: 'perm_feat_approve' }, { text: '⚔️ Tactical Kick', callback_data: 'perm_feat_autokick' }], [{ text: '📢 Broadcast', callback_data: 'perm_feat_broadcast' }, { text: '📊 Stats', callback_data: 'perm_feat_stats' }], [{ text: '🔙 Back to Admin Panel', callback_data: 'btn_admin_panel' }] ] };
-            return tgBot.editMessageText(msg, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: kb });
-        }
-        tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{});
-        return sendAdminPanel(chatId, userId);
-    }
-
-    if (data.startsWith('rem_')) {
-        if (userId !== OWNER_ID) return tgBot.answerCallbackQuery(query.id, { text: 'Owner Only!', show_alert: true });
-        if (data.startsWith('rem_admin_')) {
-            const id = parseInt(data.split('rem_admin_')[1]);
-            adminConfig.admins = adminConfig.admins.filter(a => a !== id);
-            return sendAdminPanel(chatId, userId);
-        }
-        else if (data.startsWith('rem_fsub_')) {
-            const chId = data.split('rem_fsub_')[1];
-            adminConfig.fsubChannels = adminConfig.fsubChannels.filter(c => c.id !== chId);
-            return sendAdminPanel(chatId, userId);
+        let status = await tgBot.sendMessage(chatId, "📡 *Scanning privileges...*", { parse_mode: 'Markdown' });
+        
+        try {
+            const chats = await uClient.getChats();
+            state.adminGroups = chats.filter(c => c.isGroup && c.participants.find(p => p.id.user === uClient.info.wid.user && (p.isAdmin || p.isSuperAdmin))).map(c => ({ id: c.id._serialized, name: c.name }));
+            
+            tgBot.deleteMessage(chatId, status.message_id).catch(()=>{});
+            
+            if (state.adminGroups.length === 0) {
+                return tgBot.sendMessage(chatId, "❌ Admin rights not found in any group.");
+            }
+            
+            state.currentPage = 0; 
+            state.selectedGroupsArray = [...adminConfig.securityConfig.targetGroups]; 
+            state.flowContext = 'SHIELD_TARGETS';
+            
+            return tgBot.editMessageText('🎯 *SELECT SHIELD TARGETS:*', { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: getPaginationKeyboard(userId) });
+        } catch(e) {
+            console.error(e);
         }
     }
 
-    if (data.startsWith('perm_feat_')) {
-        if (userId !== OWNER_ID) return tgBot.answerCallbackQuery(query.id, { text: '⚠️ Owner Only!', show_alert: true });
-        const featureKey = data.split('perm_feat_')[1];
-        const roles = adminConfig.featurePerms[featureKey] || [];
-        const kb = { inline_keyboard: [ [{ text: `👑 Owner: ${roles.includes('owner') ? '✅' : '❌'}`, callback_data: `perm_tgl_${featureKey}_owner` }], [{ text: `🛡️ Admin: ${roles.includes('admin') ? '✅' : '❌'}`, callback_data: `perm_tgl_${featureKey}_admin` }], [{ text: `👤 User: ${roles.includes('user') ? '✅' : '❌'}`, callback_data: `perm_tgl_${featureKey}_user` }], [{ text: '🔙 Back', callback_data: 'admin_feature_permissions' }] ] };
-        return tgBot.editMessageText(`⚙️ *PERMISSIONS FOR: ${featureKey.toUpperCase()}*\nToggle roles:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: kb });
+    // SHIELD CONTROLS
+    if (data === 'menu_security') {
+        return sendShieldMenu(chatId, userId, query.message.message_id); 
     }
     
-    if (data.startsWith('perm_tgl_')) {
-        if (userId !== OWNER_ID) return;
-        const parts = data.split('_');
-        const featKey = parts[2], roleKey = parts[3];
-        if (adminConfig.featurePerms[featKey].includes(roleKey)) adminConfig.featurePerms[featKey] = adminConfig.featurePerms[featKey].filter(r => r !== roleKey);
-        else adminConfig.featurePerms[featKey].push(roleKey);
-        
-        const roles = adminConfig.featurePerms[featKey] || [];
-        const kb = { inline_keyboard: [ [{ text: `👑 Owner: ${roles.includes('owner') ? '✅' : '❌'}`, callback_data: `perm_tgl_${featKey}_owner` }], [{ text: `🛡️ Admin: ${roles.includes('admin') ? '✅' : '❌'}`, callback_data: `perm_tgl_${featKey}_admin` }], [{ text: `👤 User: ${roles.includes('user') ? '✅' : '❌'}`, callback_data: `perm_tgl_${featKey}_user` }], [{ text: '🔙 Back', callback_data: 'admin_feature_permissions' }] ] };
-        return tgBot.editMessageText(`⚙️ *PERMISSIONS FOR: ${featKey.toUpperCase()}*\nToggle roles:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: kb });
+    if (data === 'sec_toggle_power') { 
+        adminConfig.securityConfig.enabled = !adminConfig.securityConfig.enabled; 
+        return sendShieldMenu(chatId, userId, query.message.message_id); 
+    }
+    
+    if (data === 'sec_toggle_mode') { 
+        adminConfig.securityConfig.ruleType = adminConfig.securityConfig.ruleType === 'WHITELIST' ? 'BLACKLIST' : 'WHITELIST'; 
+        return sendShieldMenu(chatId, userId, query.message.message_id); 
+    }
+    
+    if (data === 'sec_toggle_autokick') { 
+        adminConfig.securityConfig.autoKickEnabled = !adminConfig.securityConfig.autoKickEnabled; 
+        return sendShieldMenu(chatId, userId, query.message.message_id); 
+    }
+    
+    if (data === 'sec_add_country') { 
+        state.action = 'WAIT_SEC_ADD_COUNTRY'; 
+        return tgBot.editMessageText(`🌐 *ADD COUNTRY CODE*\nEnter codes (e.g. 91, 1):`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
+    }
+    
+    if (data === 'sec_rem_country') { 
+        state.action = 'WAIT_SEC_REM_COUNTRY'; 
+        return tgBot.editMessageText(`🌐 *REMOVE COUNTRY CODE*\nEnter code:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
+    }
+    
+    if (data === 'sec_add_vip') { 
+        state.action = 'WAIT_SEC_ADD_VIP'; 
+        return tgBot.editMessageText(`👤 *ADD VIP NUMBER*\nEnter number:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
+    }
+    
+    if (data === 'sec_rem_vip') { 
+        state.action = 'WAIT_SEC_REM_VIP'; 
+        return tgBot.editMessageText(`👤 *REMOVE VIP NUMBER*\nEnter number:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
     }
 
     if (data === 'menu_login') { 
-        if (!hasFeatureAccess(userId, 'login')) return tgBot.answerCallbackQuery(query.id, { text: "🔒 Access Denied", show_alert: true});
         state.action = 'WAITING_FOR_LOGIN_NUMBER'; 
-        return tgBot.editMessageText(`🔐 *PERSONAL AUTHENTICATION*\nEnter your WhatsApp Number with country code.\n✔️ Syntax: \`919876543210\``, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } }); 
+        return tgBot.editMessageText(`🔐 Enter your WhatsApp Number:`, { chat_id: chatId, message_id: query.message.message_id }); 
     }
 
-    // --- MAIN FEATURES ---
-    const actionFeatures = ['menu_creategroup', 'menu_joingroup', 'menu_rename_groups', 'menu_extractlinks', 'menu_approve', 'menu_autokick', 'menu_broadcast', 'menu_stats'];
-    if (actionFeatures.includes(data)) {
-        const featureMap = { 'menu_creategroup': 'creategroup', 'menu_joingroup': 'joingroup', 'menu_rename_groups': 'renamegroups', 'menu_extractlinks': 'extractlinks', 'menu_approve': 'approve', 'menu_autokick': 'autokick', 'menu_broadcast': 'broadcast', 'menu_stats': 'stats' };
-        if (!hasFeatureAccess(userId, featureMap[data])) return tgBot.answerCallbackQuery(query.id, { text: "🔒 Feature Denied by Role", show_alert: true});
-
-        if (!activeClients[userId] || !activeClients[userId].isReady) {
-            return tgBot.answerCallbackQuery(query.id, { text: "⚠️ System Offline! Pehle apna WhatsApp Auth (Login) complete karein.", show_alert: true });
+    // ADMIN USERS
+    if (data.startsWith('admin_')) {
+        if (data === 'admin_allow_user') { 
+            state.action = 'WAITING_FOR_ALLOW_ID'; 
+            return tgBot.editMessageText(`✅ Provide ID:`, { chat_id: chatId, message_id: query.message.message_id, reply_markup: { inline_keyboard: [[{text: '🔙 Back', callback_data: 'btn_admin_panel'}]] } }); 
         }
-        
+        if (data === 'admin_revoke_user') { 
+            state.action = 'WAITING_FOR_REVOKE_ID'; 
+            return tgBot.editMessageText(`❌ Provide ID:`, { chat_id: chatId, message_id: query.message.message_id, reply_markup: { inline_keyboard: [[{text: '🔙 Back', callback_data: 'btn_admin_panel'}]] } }); 
+        }
+        if (data === 'admin_ban_user') { 
+            state.action = 'WAITING_FOR_BAN_ID'; 
+            return tgBot.editMessageText(`🚫 Provide ID:`, { chat_id: chatId, message_id: query.message.message_id, reply_markup: { inline_keyboard: [[{text: '🔙 Back', callback_data: 'btn_admin_panel'}]] } }); 
+        }
+        if (data === 'admin_unban_user') { 
+            state.action = 'WAITING_FOR_UNBAN_ID'; 
+            return tgBot.editMessageText(`♻️ Provide ID:`, { chat_id: chatId, message_id: query.message.message_id, reply_markup: { inline_keyboard: [[{text: '🔙 Back', callback_data: 'btn_admin_panel'}]] } }); 
+        }
+    }
+    
+    // MAIN FEATURE ROUTING
+    const menuActions = ['menu_creategroup', 'menu_joingroup', 'menu_rename_groups', 'menu_extractlinks', 'menu_approve', 'menu_autokick', 'menu_broadcast', 'menu_stats'];
+    
+    if (menuActions.includes(data)) {
+        if (!activeClients[userId] || !activeClients[userId].isReady) {
+            return tgBot.answerCallbackQuery(query.id, { text: "⚠️ System Offline!", show_alert: true });
+        }
+
         if (data === 'menu_stats') {
-            try {
-                const chats = await uClient.getChats();
-                const groupsCount = chats.filter(c => c.isGroup).length;
-                const myWid = uClient.info.wid.user;
-                let adminCount = 0;
-                for (const chat of chats) {
-                    if (chat.isGroup) {
-                        const me = chat.participants.find(p => p.id.user === myWid);
-                        if (me && (me.isAdmin || me.isSuperAdmin)) adminCount++;
-                    }
-                }
-                const statsMsg = `📊 *YOUR ANALYTICS*\n${DIVIDER}\n👤 *Account:* +${myWid}\n🌐 *Chats:* ${chats.length}\n👥 *Groups:* ${groupsCount}\n👑 *Admin Roles:* ${adminCount}\n${FOOTER}`;
-                return tgBot.editMessageText(statsMsg, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Return', callback_data: 'btn_main_menu'}]] } });
-            } catch(e) { return tgBot.answerCallbackQuery(query.id, { text: `Error fetching analytics.`, show_alert: true }); }
+            return tgBot.answerCallbackQuery(query.id, { text: "Stats Ready", show_alert: false }); 
         }
 
         if (data === 'menu_creategroup') { 
             state.action = 'WAIT_GROUP_NAME'; 
-            state.groupConfig = { baseName: '', count: 0, memberId: '', desc: '', pfpPath: null, settings: { msgsAdminOnly: false, infoAdminOnly: false } };
-            return tgBot.editMessageText("➕ *Phase 1: Base Nomenclature*\nSabh groups ka aam naam kya hoga? (e.g. VIP TRADERS):", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } }); 
+            return tgBot.editMessageText("➕ *Phase 1:* Base Name?", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
         }
-        
+
         if (data === 'menu_joingroup') { 
             state.action = 'WAIT_JOIN_LINKS'; 
-            return tgBot.editMessageText("📥 *AUTO-JOIN GATEWAY*\nSend a list of invite links to infiltrate:\n\n`https://chat.whatsapp...`", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } }); 
+            return tgBot.editMessageText("📥 *AUTO-JOIN*\nSend invite links:", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
         }
-        
+
         if (data === 'menu_rename_groups') { 
             state.action = 'WAIT_RENAME_DATA'; 
-            return tgBot.editMessageText("✏️ *MASS RENAMER*\nSend Name & Link pairs (e.g., NAIMISH 06 \\n https://chat.whatsapp...):", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } }); 
+            return tgBot.editMessageText("✏️ *MASS RENAMER*\nSend Name & Link pairs:", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
         }
         
-        // SCAN FOR ADMIN PRIVILEGES
-        tgBot.answerCallbackQuery(query.id).catch(()=>{});
-        let status = await tgBot.sendMessage(chatId, "📡 *Scanning network for your admin privileges...*", { parse_mode: 'Markdown' });
+        let status = await tgBot.sendMessage(chatId, "📡 *Scanning privileges...*", { parse_mode: 'Markdown' });
+        
         try {
             const chats = await uClient.getChats();
             state.adminGroups = chats.filter(c => c.isGroup && c.participants.find(p => p.id.user === uClient.info.wid.user && (p.isAdmin || p.isSuperAdmin))).map(c => ({ id: c.id._serialized, name: c.name }));
+            
             tgBot.deleteMessage(chatId, status.message_id).catch(()=>{});
             
             if (state.adminGroups.length === 0) {
-                return tgBot.sendMessage(chatId, "❌ Admin rights not found in any group.", { reply_markup: { inline_keyboard: [[{text: '🔙 Return', callback_data: 'btn_main_menu'}]] } });
+                return tgBot.sendMessage(chatId, "❌ Admin rights not found.");
             }
             
             state.currentPage = 0; 
-            state.selectedGroupsArray = [];
+            state.selectedGroupsArray = []; 
             state.flowContext = data.replace('menu_', '').toUpperCase();
             
-            let title = data === 'menu_autokick' ? '🎯 *SELECT PURGE TARGETS:*' : data === 'menu_broadcast' ? '📢 *SELECT BROADCAST TARGETS:*' : data === 'menu_approve' ? '👥 *SELECT AUTO-APPROVE TARGETS:*' : '🔗 *SELECT SCRAPE TARGETS:*';
-            return tgBot.editMessageText(title, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: getPaginationKeyboard(userId) });
-        } catch(e) { 
-            tgBot.sendMessage(chatId, "❌ Privilege scan failed."); 
+            return tgBot.editMessageText('🎯 *SELECT TARGETS:*', { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: getPaginationKeyboard(userId) });
+        } catch(e) {
+            console.error(e);
         }
     }
-
-    // --- GROUP BUILDER INLINE ACTIONS ---
-    if (data === 'grp_skip_desc') {
+    
+    // GROUP BUILDER INLINE
+    if (data === 'grp_skip_desc') { 
         state.groupConfig.desc = ''; 
-        state.action = 'WAIT_GROUP_PFP';
-        return tgBot.editMessageText("🖼️ *Phase 5: Profile Picture*\nGroup DP send karein (Send as Photo), ya Skip dabayein.", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '⏩ Skip DP', callback_data: 'grp_skip_pfp'}], [{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } });
+        state.action = 'WAIT_GROUP_PFP'; 
+        return tgBot.editMessageText("🖼️ *Phase 5:* Send DP or Skip.", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '⏩ Skip DP', callback_data: 'grp_skip_pfp'}]] } }); 
     }
-    if (data === 'grp_skip_pfp') {
+    if (data === 'grp_skip_pfp') { 
         state.groupConfig.pfpPath = null; 
-        state.action = null;
-        return sendGroupSettingsMenu(chatId, userId, query.message.message_id);
+        state.action = null; 
+        return sendGroupSettingsMenu(chatId, userId, query.message.message_id); 
     }
-    if (data.startsWith('grp_tgl_')) {
-        const setKey = data.replace('grp_tgl_', '');
-        state.groupConfig.settings[setKey] = !state.groupConfig.settings[setKey];
-        return sendGroupSettingsMenu(chatId, userId, query.message.message_id);
+    if (data.startsWith('grp_tgl_')) { 
+        const setKey = data.replace('grp_tgl_', ''); 
+        state.groupConfig.settings[setKey] = !state.groupConfig.settings[setKey]; 
+        return sendGroupSettingsMenu(chatId, userId, query.message.message_id); 
     }
-    if (data === 'grp_deploy_now') {
-        tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{});
-        return startGroupCreationProcess(chatId, userId, uClient);
-    }
-
-    // --- TARGET PAGINATION CONTROLS ---
-    if (data.startsWith('selgrp_')) {
-        const id = data.split('_')[1];
-        if (state.selectedGroupsArray.includes(id)) {
-            state.selectedGroupsArray = state.selectedGroupsArray.filter(g => g !== id);
-        } else {
-            state.selectedGroupsArray.push(id);
-        }
-        return tgBot.editMessageReplyMarkup(getPaginationKeyboard(userId), { chat_id: chatId, message_id: query.message.message_id }).catch(()=>{});
-    }
-    if (data === 'select_all') {
-        state.selectedGroupsArray = 'ALL';
-        return tgBot.editMessageReplyMarkup(getPaginationKeyboard(userId), { chat_id: chatId, message_id: query.message.message_id }).catch(()=>{});
-    }
-    if (data.startsWith('page_')) {
-        state.currentPage = parseInt(data.split('_')[1]);
-        return tgBot.editMessageReplyMarkup(getPaginationKeyboard(userId), { chat_id: chatId, message_id: query.message.message_id }).catch(()=>{});
+    if (data === 'grp_deploy_now') { 
+        tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{}); 
+        return startGroupCreationProcess(chatId, userId, uClient); 
     }
 
-    // --- EXECUTE MASS SELECTIONS ---
+    // EXECUTION LOGIC (CONFIRM SELECTION)
     if (data === 'confirm_selection') {
-        if (state.selectedGroupsArray.length === 0 && state.selectedGroupsArray !== 'ALL') {
-            return tgBot.answerCallbackQuery(query.id, { text: "⚠️ Select at least 1 target!", show_alert: true });
+        if (state.flowContext === 'SHIELD_TARGETS') { 
+            adminConfig.securityConfig.targetMode = 'SELECTED'; 
+            adminConfig.securityConfig.targetGroups = [...state.selectedGroupsArray]; 
+            return sendShieldMenu(chatId, userId, query.message.message_id); 
         }
-
         if (state.flowContext === 'BROADCAST') { 
             state.action = 'WAIT_BROADCAST_MSG'; 
-            return tgBot.editMessageText("📢 *GLOBAL BROADCAST*\nNeeche apna payload message type karein:", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } }); 
+            return tgBot.editMessageText("📢 *Type Broadcast Payload:*", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
         }
         if (state.flowContext === 'AUTOKICK') { 
             state.action = 'WAIT_KICK_TERM'; 
-            return tgBot.editMessageText("⚔️ *TACTICAL PURGE*\nTarget country code ya number dalein (e.g. +1, 91987...):", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } }); 
+            return tgBot.editMessageText("⚔️ *Type Target Number/Code:*", { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown' }); 
         }
         if (state.flowContext === 'EXTRACTLINKS') { 
             tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{}); 
             return extractGroupLinksEngine(chatId, userId, uClient); 
         }
-        if (state.flowContext === 'APPROVE') {
-            const kb = { inline_keyboard: [ 
-                [{ text: '🔓 Turn OFF Approval Setting', callback_data: 'approve_opt_off' }], 
-                [{ text: '✔️ Execute 1-by-1 Approval', callback_data: 'approve_opt_manual' }],
-                [{ text: '🔙 Abort', callback_data: 'btn_main_menu' }]
-            ]};
-            return tgBot.editMessageText(`👥 *APPROVAL GATEWAY*\nKaunsa method use karna hai?`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: kb });
+        if (state.flowContext === 'APPROVE') { 
+            const kb = { 
+                inline_keyboard: [ 
+                    [{ text: '🔓 Turn OFF Approval', callback_data: 'approve_opt_off' }], 
+                    [{ text: '✔️ Execute Manual', callback_data: 'approve_opt_manual' }] 
+                ]
+            };
+            return tgBot.editMessageText(`👥 *METHOD?*`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: kb }); 
         }
     }
 
-    if (data === 'approve_opt_off' || data === 'approve_opt_manual') {
-        tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{});
-        return autoApproveEngine(chatId, userId, uClient, data === 'approve_opt_off' ? 'OFF_SETTING' : 'MANUAL');
+    if (data === 'approve_opt_off' || data === 'approve_opt_manual') { 
+        tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{}); 
+        return autoApproveEngine(chatId, userId, uClient, data === 'approve_opt_off' ? 'OFF_SETTING' : 'MANUAL'); 
+    }
+    
+    // PAGINATION CONTROLS
+    if (data.startsWith('selgrp_')) { 
+        const id = data.split('_')[1]; 
+        if (state.selectedGroupsArray.includes(id)) {
+            state.selectedGroupsArray = state.selectedGroupsArray.filter(g => g !== id);
+        } else {
+            state.selectedGroupsArray.push(id);
+        }
+        return tgBot.editMessageReplyMarkup(getPaginationKeyboard(userId), { chat_id: chatId, message_id: query.message.message_id }).catch(()=>{}); 
+    }
+
+    if (data === 'select_all') { 
+        state.selectedGroupsArray = 'ALL'; 
+        return tgBot.editMessageReplyMarkup(getPaginationKeyboard(userId), { chat_id: chatId, message_id: query.message.message_id }).catch(()=>{}); 
+    }
+
+    if (data.startsWith('page_')) { 
+        state.currentPage = parseInt(data.split('_')[1]); 
+        return tgBot.editMessageReplyMarkup(getPaginationKeyboard(userId), { chat_id: chatId, message_id: query.message.message_id }).catch(()=>{}); 
     }
 });
 
-// UI BUILDERS
 function getPaginationKeyboard(userId) {
-    const state = getState(userId);
-    const start = state.currentPage * 5;
+    const state = getState(userId); 
+    const start = state.currentPage * 5; 
     const items = state.adminGroups.slice(start, start + 5);
     
-    let kb = [[{ text: 'Select ALL ZONES', callback_data: 'select_all' }]];
+    let kb = [[{ text: 'Select ALL', callback_data: 'select_all' }]];
     
-    items.forEach(g => {
-        const isSelected = state.selectedGroupsArray === 'ALL' || state.selectedGroupsArray.includes(g.id);
-        kb.push([{ text: `${isSelected ? '✅' : '👑'} ${g.name}`, callback_data: `selgrp_${g.id}` }]);
+    items.forEach(g => { 
+        const isSelected = state.selectedGroupsArray === 'ALL' || state.selectedGroupsArray.includes(g.id); 
+        kb.push([{ text: `${isSelected ? '✅' : '👑'} ${g.name}`, callback_data: `selgrp_${g.id}` }]); 
     });
-
-    let navRow = [];
-    if (state.currentPage > 0) navRow.push({ text: '◀️ Prev', callback_data: `page_${state.currentPage - 1}` });
-    if (state.currentPage < Math.ceil(state.adminGroups.length / 5) - 1) navRow.push({ text: 'Next ▶️', callback_data: `page_${state.currentPage + 1}` });
-    if (navRow.length > 0) kb.push(navRow);
     
-    kb.push([{ text: `⚡ Execute Protocol`, callback_data: 'confirm_selection' }]);
-    kb.push([{ text: '🔙 Cancel', callback_data: 'btn_main_menu' }]);
+    let navRow = [];
+    if (state.currentPage > 0) {
+        navRow.push({ text: '◀️ Prev', callback_data: `page_${state.currentPage - 1}` });
+    }
+    if (state.currentPage < Math.ceil(state.adminGroups.length / 5) - 1) {
+        navRow.push({ text: 'Next ▶️', callback_data: `page_${state.currentPage + 1}` });
+    }
+    
+    if (navRow.length > 0) {
+        kb.push(navRow);
+    }
+    
+    kb.push([{ text: `⚡ Confirm Selection`, callback_data: 'confirm_selection' }]); 
     return { inline_keyboard: kb };
 }
 
 function sendGroupSettingsMenu(chatId, userId, msgId) {
     const state = getState(userId);
-    const kb = { inline_keyboard: [
-        [{ text: `🔒 Admin Only Messages: ${state.groupConfig.settings.msgsAdminOnly ? '🟢 ON' : '🔴 OFF'}`, callback_data: 'grp_tgl_msgsAdminOnly' }],
-        [{ text: `✏️ Admin Only Edit Info: ${state.groupConfig.settings.infoAdminOnly ? '🟢 ON' : '🔴 OFF'}`, callback_data: 'grp_tgl_infoAdminOnly' }],
-        [{ text: `🚀 LAUNCH DEPLOYMENT (${state.groupConfig.count} Groups)`, callback_data: 'grp_deploy_now' }],
-        [{ text: '🔙 Abort Everything', callback_data: 'btn_main_menu' }]
-    ]};
-
-    const text = `⚙️ *Phase 6: Group Permissions*\nGroups ki default security settings check karein:`;
+    const kb = { 
+        inline_keyboard: [ 
+            [{ text: `🔒 Admin Only Messages: ${state.groupConfig.settings.msgsAdminOnly ? 'ON' : 'OFF'}`, callback_data: 'grp_tgl_msgsAdminOnly' }], 
+            [{ text: `✏️ Admin Only Edit Info: ${state.groupConfig.settings.infoAdminOnly ? 'ON' : 'OFF'}`, callback_data: 'grp_tgl_infoAdminOnly' }], 
+            [{ text: `🚀 LAUNCH DEPLOYMENT`, callback_data: 'grp_deploy_now' }] 
+        ]
+    };
+    
     if (msgId) {
-        tgBot.editMessageText(text, { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown', reply_markup: kb }).catch(()=>{});
+        tgBot.editMessageText(`⚙️ *Phase 6: Permissions*`, { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown', reply_markup: kb }).catch(()=>{});
     } else {
-        tgBot.sendMessage(chatId, text, { parse_mode: 'Markdown', reply_markup: kb });
+        tgBot.sendMessage(chatId, `⚙️ *Phase 6: Permissions*`, { parse_mode: 'Markdown', reply_markup: kb });
     }
 }
 
 // ============================================================================
-// 📥 10. MESSAGE LISTENER (INPUT HANDLERS WITH ADMIN NOTIFICATIONS)
+// 📥 10. TEXT / MEDIA INPUT HANDLER
 // ============================================================================
 tgBot.on('message', async (msg) => {
-    const chatId = msg.chat.id;
-    const userId = msg.from.id;
-    const text = msg.text || '';
+    const chatId = msg.chat.id; 
+    const userId = msg.from.id; 
+    const text = msg.text || ''; 
     const state = getState(userId);
-    const uClient = activeClients[userId]?.client;
 
-    if (text.startsWith('/') || !(await checkAccess(userId, chatId, msg))) return;
-
-    // --- 🚨 ADMIN SYSTEM ADD/REMOVE (WITH DIRECT NOTIFICATIONS) ---
-    if (state.action && state.action.startsWith('WAITING_FOR_')) {
-        const id = parseInt(text);
-        if (isNaN(id)) return tgBot.sendMessage(chatId, "⚠️ Invalid ID format! Sirf numbers allow hain.");
-
-        if (state.action === 'WAITING_FOR_ALLOW_ID' && (userId === OWNER_ID || adminConfig.admins.includes(userId))) {
-            if (!adminConfig.allowedUsers.includes(id)) adminConfig.allowedUsers.push(id);
-            tgBot.sendMessage(chatId, `✅ ID \`${id}\` allowed successfully.`, {parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Panel', callback_data: 'btn_admin_panel'}]] } });
-            
-            // 🔥 NOTIFY THE USER THAT THEY ARE APPROVED!
-            tgBot.sendMessage(id, `🎉 *ACCESS GRANTED*\n\nBadhaai ho! Admin ne aapko Supreme Master Bot use karne ki permission de di hai.\nAb aap /start daba kar login kar sakte hain.`, { parse_mode: 'Markdown' }).catch(()=>{
-                tgBot.sendMessage(chatId, `⚠️ User ko notification deliver nahi hua (shayad usne bot block kiya hai ya abhi tak start nahi kiya), par database me allow ho gaya hai.`);
-            });
-            state.action = null; return;
-        }
-        if (state.action === 'WAITING_FOR_REVOKE_ID' && (userId === OWNER_ID || adminConfig.admins.includes(userId))) {
-            adminConfig.allowedUsers = adminConfig.allowedUsers.filter(u => u !== id);
-            tgBot.sendMessage(chatId, `❌ Access revoked for ID \`${id}\`.`, {parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Panel', callback_data: 'btn_admin_panel'}]] } });
-            
-            // 🔥 NOTIFY THE USER THAT THEY ARE REVOKED
-            tgBot.sendMessage(id, `🔒 *ACCESS REVOKED*\n\nAdmin ne aapka access wapas le liya hai.`, { parse_mode: 'Markdown' }).catch(()=>{});
-            state.action = null; return;
-        }
-        if (state.action === 'WAITING_FOR_BAN_ID' && userId === OWNER_ID) {
-            if (!adminConfig.bannedUsers.includes(id)) adminConfig.bannedUsers.push(id);
-            tgBot.sendMessage(chatId, `🚫 ID \`${id}\` banned.`, {parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Panel', callback_data: 'btn_admin_panel'}]] } });
-            
-            // 🔥 NOTIFY BAN
-            tgBot.sendMessage(id, `🚫 *ACCOUNT BANNED*\n\nAapko Supreme Master system se permanently block kar diya gaya hai.`, { parse_mode: 'Markdown' }).catch(()=>{});
-            state.action = null; return;
-        }
-        if (state.action === 'WAITING_FOR_UNBAN_ID' && userId === OWNER_ID) {
-            adminConfig.bannedUsers = adminConfig.bannedUsers.filter(u => u !== id);
-            tgBot.sendMessage(chatId, `♻️ ID \`${id}\` unbanned.`, {parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Panel', callback_data: 'btn_admin_panel'}]] } });
-            
-            // 🔥 NOTIFY UNBAN
-            tgBot.sendMessage(id, `♻️ *ACCOUNT UNBANNED*\n\nAapka account unblock ho gaya hai. Aap wapas bot use kar sakte hain!`, { parse_mode: 'Markdown' }).catch(()=>{});
-            state.action = null; return;
-        }
-        if (state.action === 'WAITING_FOR_ADMIN_ID' && userId === OWNER_ID) {
-            if (!adminConfig.admins.includes(id)) adminConfig.admins.push(id);
-            tgBot.sendMessage(chatId, `👑 Admin rights granted to \`${id}\`.`, {parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Panel', callback_data: 'btn_admin_panel'}]] } });
-            tgBot.sendMessage(id, `👑 *ADMIN RIGHTS GRANTED*\n\nAapko ab system admin bana diya gaya hai! Type /admin to access the control panel.`, { parse_mode: 'Markdown' }).catch(()=>{});
-            state.action = null; return;
-        }
-        if (state.action === 'WAITING_FOR_FSUB_DATA' && userId === OWNER_ID) {
-            const parts = text.split('|').map(s => s.trim());
-            if (parts.length !== 2 || !parts[0].startsWith('@') || !parts[1].startsWith('http')) return tgBot.sendMessage(chatId, `⚠️ Syntax Error! Use: @ChannelID | https://link`);
-            adminConfig.fsubChannels.push({ id: parts[0], link: parts[1] });
-            tgBot.sendMessage(chatId, `📢 F-Sub added successfully.`, {parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Panel', callback_data: 'btn_admin_panel'}]] } });
-            state.action = null; return;
-        }
+    if (text.startsWith('/') || !(await checkAccess(userId, chatId, msg))) {
+        return;
     }
 
+    // 🔥 SMART SYS: BOT USER BROADCAST EXECUTION (ANY MEDIA SUPPORT)
+    if (state.action === 'WAIT_BOT_BROADCAST_MSG') {
+        state.action = null;
+        let targets = [...knownBotUsers]; 
+        
+        if (targets.length === 0) {
+            return tgBot.sendMessage(chatId, `⚠️ No bot users in database.`);
+        }
+        
+        let statusMsg = await tgBot.sendMessage(chatId, `⏳ *Transmitting Payload to ${targets.length} users...*`, { parse_mode: 'Markdown' });
+        let success = 0; 
+        let failed = 0;
+
+        for (let i = 0; i < targets.length; i++) {
+            try {
+                await tgBot.copyMessage(targets[i], chatId, msg.message_id);
+                success++;
+            } catch (e) {
+                failed++;
+            }
+            
+            await new Promise(r => setTimeout(r, 50)); 
+            
+            if ((i + 1) % 15 === 0) {
+                tgBot.editMessageText(`⏳ *Transmitting...*\n${createProgressBar(i+1, targets.length)}`, { chat_id: chatId, message_id: statusMsg.message_id, parse_mode: 'Markdown' }).catch(()=>{});
+            }
+        }
+        
+        await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
+        
+        const finalReport = `📢 *BOT BROADCAST REPORT*\n${DIVIDER}\n🎯 *Total Targets:* ${targets.length}\n✅ *Successful:* ${success}\n❌ *Failed/Blocked:* ${failed}\n${FOOTER}`;
+        
+        return tgBot.sendMessage(chatId, finalReport, { 
+            parse_mode: 'Markdown', 
+            reply_markup: { inline_keyboard: [[{text: '🔙 Back to Admin', callback_data: 'btn_admin_panel'}]] } 
+        });
+    }
+
+    // SHIELD DATA COLLECTION
+    if (state.action && state.action.startsWith('WAIT_SEC_')) {
+        if (state.action === 'WAIT_SEC_LINKS') {
+            const uClient = activeClients[userId]?.client;
+            
+            if (!uClient) {
+                return tgBot.sendMessage(chatId, "⚠️ Engine Offline!");
+            }
+            
+            const codes = [...text.matchAll(/(?:chat\.whatsapp\.com\/)([a-zA-Z0-9]{15,25})/gi)].map(m => m[1]);
+            
+            if (codes.length === 0) {
+                return tgBot.sendMessage(chatId, "⚠️ No valid links found.");
+            }
+            
+            let statusMsg = await tgBot.sendMessage(chatId, `⏳ *Securing Links...*`);
+            adminConfig.securityConfig.targetMode = 'LINKS';
+            
+            if(adminConfig.securityConfig.targetMode !== 'LINKS') {
+                adminConfig.securityConfig.targetGroups = []; 
+            }
+
+            for (let code of codes) {
+                try {
+                    let gid; 
+                    try { 
+                        gid = await uClient.acceptInvite(code); 
+                    } catch(e) { 
+                        const info = await uClient.getInviteInfo(code); 
+                        gid = info.id._serialized; 
+                    }
+                    
+                    if (!adminConfig.securityConfig.targetGroups.includes(gid)) {
+                        adminConfig.securityConfig.targetGroups.push(gid);
+                    }
+                    
+                    await new Promise(r=>setTimeout(r,1500));
+                } catch(e) {
+                    console.error("Failed to secure link:", code);
+                }
+            }
+            
+            tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
+            state.action = null; 
+            return sendShieldMenu(chatId, userId, null);
+        }
+        
+        const inputList = text.replace(/\s/g, '').split(',').filter(i => i !== '');
+        
+        if (state.action === 'WAIT_SEC_ADD_COUNTRY') {
+            adminConfig.securityConfig.countries.push(...inputList);
+        }
+        if (state.action === 'WAIT_SEC_REM_COUNTRY') {
+            adminConfig.securityConfig.countries = adminConfig.securityConfig.countries.filter(c => !inputList.includes(c));
+        }
+        if (state.action === 'WAIT_SEC_ADD_VIP') {
+            adminConfig.securityConfig.vipNumbers.push(...inputList);
+        }
+        if (state.action === 'WAIT_SEC_REM_VIP') {
+            adminConfig.securityConfig.vipNumbers = adminConfig.securityConfig.vipNumbers.filter(n => !inputList.includes(n));
+        }
+        
+        adminConfig.securityConfig.countries = [...new Set(adminConfig.securityConfig.countries)]; 
+        adminConfig.securityConfig.vipNumbers = [...new Set(adminConfig.securityConfig.vipNumbers)];
+        
+        state.action = null; 
+        return sendShieldMenu(chatId, userId, null);
+    }
+
+    // ADMIN USER COLLECTION
+    if (state.action === 'WAITING_FOR_ALLOW_ID') { 
+        adminConfig.allowedUsers.push(parseInt(text)); 
+        state.action = null; 
+        return tgBot.sendMessage(chatId, `✅ Allowed.`); 
+    }
+    if (state.action === 'WAITING_FOR_REVOKE_ID') { 
+        adminConfig.allowedUsers = adminConfig.allowedUsers.filter(u => u !== parseInt(text)); 
+        state.action = null; 
+        return tgBot.sendMessage(chatId, `❌ Revoked.`); 
+    }
+    if (state.action === 'WAITING_FOR_BAN_ID') { 
+        adminConfig.bannedUsers.push(parseInt(text)); 
+        state.action = null; 
+        return tgBot.sendMessage(chatId, `🚫 Banned.`); 
+    }
+    if (state.action === 'WAITING_FOR_UNBAN_ID') { 
+        adminConfig.bannedUsers = adminConfig.bannedUsers.filter(u => u !== parseInt(text)); 
+        state.action = null; 
+        return tgBot.sendMessage(chatId, `♻️ Unbanned.`); 
+    }
+
+    // CORE FEATURE COLLECTION
     if (state.action === 'WAITING_FOR_LOGIN_NUMBER') { 
         state.action = null; 
-        const cleanNumber = text.replace(/[^0-9]/g, '');
-        if (cleanNumber.length < 10) return tgBot.sendMessage(chatId, `⚠️ Format galat hai. Only numbers with country code.`);
-        return startWhatsAppClient(userId, chatId, cleanNumber); 
+        return startWhatsAppClient(userId, chatId, text.replace(/[^0-9]/g, '')); 
     }
     
-    // --- MASS RENAMER ENGINE (TEXT PARSING) ---
-    else if (state.action === 'WAIT_RENAME_DATA') {
-        const blocks = text.split(/(?:https?:\/\/)?chat\.whatsapp\.com\/[a-zA-Z0-9]{15,25}/i);
-        const codes = [...text.matchAll(/(?:https?:\/\/)?chat\.whatsapp\.com\/([a-zA-Z0-9]{15,25})/gi)].map(m => m[1]);
-        
-        if (codes.length === 0) return tgBot.sendMessage(chatId, `⚠️ No valid WhatsApp invite links found.`, { parse_mode: 'Markdown' });
-
-        state.action = null; 
-        let statusMsg = await tgBot.sendMessage(chatId, `⏳ *RENAMING PROTOCOL INITIATED*\nAnalyzing payload...`, { parse_mode: 'Markdown' });
-        let report = `✅ *MASS RENAME REPORT*\n${DIVIDER}\n`;
-        let successCount = 0;
-
-        for (let i = 0; i < codes.length; i++) {
-            let textBefore = blocks[i];
-            let lines = textBefore.split('\n').map(l=>l.trim()).filter(l=>l!=='');
-            let rawName = lines.length > 0 ? lines[lines.length - 1] : `Group ${i+1}`;
-            
-            if (rawName.match(/^(LINK|GROUP LINK)[\s:-]*$/i)) {
-                rawName = lines.length > 1 ? lines[lines.length - 2] : `Group ${i+1}`;
-            }
-            
-            const targetName = rawName.replace(/^(GROUP\s*NAME|NAME)[\s:-]*/i, '').trim();
-
-            try {
-                await tgBot.editMessageText(`✏️ *Executing Rename...*\n${createProgressBar(i+1, codes.length)}\nTarget: *${targetName}*`, { chat_id: chatId, message_id: statusMsg.message_id, parse_mode: 'Markdown' });
-                
-                let newGroupId;
-                try {
-                    newGroupId = await uClient.acceptInvite(codes[i]);
-                } catch (e) {
-                    const inviteInfo = await uClient.getInviteInfo(codes[i]);
-                    newGroupId = inviteInfo.id._serialized;
-                }
-                
-                const chat = await uClient.getChatById(newGroupId);
-                await chat.sendStateTyping(); 
-                await new Promise(r => setTimeout(r, 1000));
-                
-                await chat.setSubject(targetName);
-                report += `🔹 *${targetName}*\n✔️ Successfully Renamed\n\n`;
-                successCount++;
-
-                await new Promise(r => setTimeout(r, 2000)); 
-            } catch (e) { 
-                report += `🔹 *${targetName}*\n❌ Failed: _${e.message}_\n\n`; 
-            }
-        }
-        await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
-        report += `🎯 *Total Renamed: ${successCount}/${codes.length}*${FOOTER}`;
-        return sendLongReport(chatId, report, 'Rename_Report', { reply_markup: { inline_keyboard: [[{text: '🔙 Return', callback_data: 'btn_main_menu'}]] } });
-    }
-
-    // --- AUTO JOIN ENGINE (TEXT PARSING) ---
-    else if (state.action === 'WAIT_JOIN_LINKS') {
-        const codes = [...text.matchAll(/(?:chat\.whatsapp\.com\/)([a-zA-Z0-9]{15,25})/gi)].map(m => m[1]);
-        if (codes.length === 0) return tgBot.sendMessage(chatId, `⚠️ No valid links found.`, { parse_mode: 'Markdown' });
-        
-        state.action = null; 
-        let statusMsg = await tgBot.sendMessage(chatId, `⏳ *INFILTRATION INITIATED*`, { parse_mode: 'Markdown' });
-        let report = `✅ *INFILTRATION REPORT*\n${DIVIDER}\n`;
-        let successCount = 0;
-
-        for (let i = 0; i < codes.length; i++) {
-            try {
-                await tgBot.editMessageText(`📥 *Joining Systems...*\n${createProgressBar(i+1, codes.length)}`, { chat_id: chatId, message_id: statusMsg.message_id, parse_mode: 'Markdown' });
-                
-                const newGroupId = await uClient.acceptInvite(codes[i]);
-                let groupName = "Classified Sector";
-                try { 
-                    const joinedChat = await uClient.getChatById(newGroupId); 
-                    groupName = joinedChat.name; 
-                } catch(e) {}
-                
-                report += `🔹 *${groupName}*\n✔️ Joined\n\n`;
-                successCount++;
-                
-                await new Promise(r => setTimeout(r, 3000)); 
-            } catch (e) { 
-                report += `🔹 *Code: ${codes[i]}*\n❌ _Access Denied_\n\n`; 
-            }
-        }
-        await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
-        report += `🎯 *Joined: ${successCount}/${codes.length}*${FOOTER}`;
-        return sendLongReport(chatId, report, 'Join_Report', { reply_markup: { inline_keyboard: [[{text: '🔙 Return', callback_data: 'btn_main_menu'}]] } });
-    }
-
-    // --- GROUP BUILDER DATA COLLECTION ---
-    else if (state.action === 'WAIT_GROUP_NAME') {
+    if (state.action === 'WAIT_GROUP_NAME') { 
         state.groupConfig.baseName = text.trim(); 
-        state.action = 'WAIT_GROUP_COUNT';
-        tgBot.sendMessage(chatId, `🔢 *Phase 2: Quantity*\nKitne clone groups banane hain? (e.g., 5, 10, 50)`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } });
+        state.action = 'WAIT_GROUP_COUNT'; 
+        return tgBot.sendMessage(chatId, `🔢 *Phase 2:* Quantity?`); 
     } 
-    else if (state.action === 'WAIT_GROUP_COUNT') {
-        const count = parseInt(text);
-        if (isNaN(count) || count < 1) return tgBot.sendMessage(chatId, "⚠️ Ek valid number type karo (1, 5, 10 etc).");
-        state.groupConfig.count = count; 
-        state.action = 'WAIT_GROUP_MEMBER';
-        tgBot.sendMessage(chatId, `👤 *Phase 3: Base Member ID*\nWA Rules ke anusaar kam se kam 1 dusra number add karna hoga (e.g., 919876543210):`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } });
+    
+    if (state.action === 'WAIT_GROUP_COUNT') { 
+        state.groupConfig.count = parseInt(text); 
+        state.action = 'WAIT_GROUP_MEMBER'; 
+        return tgBot.sendMessage(chatId, `👤 *Phase 3:* Member ID?`); 
     } 
-    else if (state.action === 'WAIT_GROUP_MEMBER') {
+    
+    if (state.action === 'WAIT_GROUP_MEMBER') { 
         state.groupConfig.memberId = text.replace(/[^0-9]/g, '') + '@c.us'; 
-        state.action = 'WAIT_GROUP_DESC';
-        tgBot.sendMessage(chatId, `📝 *Phase 4: Description*\nGroup metadata/description bhejo, ya skip karo.`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '⏩ Skip Description', callback_data: 'grp_skip_desc'}], [{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } });
+        state.action = 'WAIT_GROUP_DESC'; 
+        return tgBot.sendMessage(chatId, `📝 *Phase 4:* Desc?`, { reply_markup: { inline_keyboard: [[{text: '⏩ Skip', callback_data: 'grp_skip_desc'}]] } }); 
     } 
-    else if (state.action === 'WAIT_GROUP_DESC') {
+    
+    if (state.action === 'WAIT_GROUP_DESC') { 
         state.groupConfig.desc = text; 
-        state.action = 'WAIT_GROUP_PFP';
-        tgBot.sendMessage(chatId, `🖼️ *Phase 5: Profile Picture*\nGroup icon/DP send karo (Send as Photo), ya skip karo.`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '⏩ Skip DP', callback_data: 'grp_skip_pfp'}], [{text: '🔙 Abort', callback_data: 'btn_main_menu'}]] } });
+        state.action = 'WAIT_GROUP_PFP'; 
+        return tgBot.sendMessage(chatId, `🖼️ *Phase 5:* DP?`, { reply_markup: { inline_keyboard: [[{text: '⏩ Skip', callback_data: 'grp_skip_pfp'}]] } }); 
     }
-    else if (state.action === 'WAIT_GROUP_PFP') {
+    
+    if (state.action === 'WAIT_GROUP_PFP') {
         if (msg.photo) {
             const fileId = msg.photo[msg.photo.length - 1].file_id;
-            tgBot.sendMessage(chatId, "⏳ Downloading Profile Picture to Server...");
             try { 
-                const filePath = await tgBot.downloadFile(fileId, __dirname);
+                const filePath = await tgBot.downloadFile(fileId, __dirname); 
                 state.groupConfig.pfpPath = filePath; 
                 state.action = null; 
                 sendGroupSettingsMenu(chatId, userId, null); 
             } catch (e) { 
-                tgBot.sendMessage(chatId, "❌ Server download failed. Skipping DP automatically."); 
-                state.groupConfig.pfpPath = null; 
                 state.action = null; 
                 sendGroupSettingsMenu(chatId, userId, null); 
             }
-        } else {
-            tgBot.sendMessage(chatId, "⚠️ File format galat hai. Ya toh Photo bhejo (as Image) ya 'Skip' button use karo.");
         }
     }
-    
-    // --- OTHER FEATURE INPUTS ---
-    else if (state.action === 'WAIT_KICK_TERM') { 
+
+    if (state.action === 'WAIT_KICK_TERM') { 
+        const uClient = activeClients[userId].client; 
         return runPurgeEngine(chatId, userId, uClient, text); 
     }
-    else if (state.action === 'WAIT_BROADCAST_MSG') {
+    
+    if (state.action === 'WAIT_BROADCAST_MSG') {
+        const uClient = activeClients[userId].client; 
         const targets = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g=>g.id) : state.selectedGroupsArray;
+        
         state.action = null; 
+        tgBot.sendMessage(chatId, `⏳ *Transmitting WhatsApp Broadcast...*`);
         
-        let statusMsg = await tgBot.sendMessage(chatId, `⏳ *Transmitting Broadcast...*`, { parse_mode: 'Markdown' });
-        let sentCount = 0;
+        for (let t of targets) { 
+            try { 
+                const chat = await uClient.getChatById(t); 
+                await chat.sendMessage(text); 
+            } catch(e) {} 
+        }
         
-        for (let i = 0; i < targets.length; i++) {
-            try {
-                const chat = await uClient.getChatById(targets[i]);
-                await tgBot.editMessageText(`📢 *Deploying Payload...*\n${createProgressBar(i+1, targets.length)}`, { chat_id: chatId, message_id: statusMsg.message_id, parse_mode: 'Markdown' });
-                
-                await chat.sendStateTyping();
-                await new Promise(r => setTimeout(r, 1000));
-                
-                await chat.sendMessage(`📢 *BROADCAST*\n\n${text}`); 
-                sentCount++; 
-                await new Promise(r => setTimeout(r, 2000));
-            } catch (e) {
-                console.error("Broadcast delivery failed:", e);
+        return tgBot.sendMessage(chatId, `✅ Delivered.`);
+    }
+
+    if (state.action === 'WAIT_RENAME_DATA') {
+        const uClient = activeClients[userId].client; 
+        const blocks = text.split(/(?:https?:\/\/)?chat\.whatsapp\.com\/[a-zA-Z0-9]{15,25}/i);
+        const codes = [...text.matchAll(/(?:https?:\/\/)?chat\.whatsapp\.com\/([a-zA-Z0-9]{15,25})/gi)].map(m => m[1]);
+        
+        if (codes.length === 0) {
+            return;
+        }
+        
+        state.action = null; 
+        let report = `✅ *RENAME REPORT*\n`;
+        
+        for (let i = 0; i < codes.length; i++) {
+            let lines = blocks[i].split('\n').map(l=>l.trim()).filter(l=>l!==''); 
+            let targetName = (lines.length > 0 ? lines[lines.length - 1] : `Group`).replace(/^(GROUP\s*NAME|NAME)[\s:-]*/i, '').trim();
+            
+            try { 
+                let gid = await uClient.acceptInvite(codes[i]); 
+                const chat = await uClient.getChatById(gid); 
+                await chat.setSubject(targetName); 
+                report += `🔹 *${targetName}* ✔️\n`; 
+            } catch (e) { 
+                report += `🔹 *${targetName}* ❌\n`; 
             }
         }
-        await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
-        return tgBot.sendMessage(chatId, `✅ Message safely delivered to ${sentCount} sectors.`, { reply_markup: { inline_keyboard: [[{text: '🔙 Return', callback_data: 'btn_main_menu'}]] } });
+        
+        return sendLongReport(chatId, report, 'Rename_Report');
+    }
+
+    if (state.action === 'WAIT_JOIN_LINKS') {
+        const uClient = activeClients[userId].client; 
+        const codes = [...text.matchAll(/(?:chat\.whatsapp\.com\/)([a-zA-Z0-9]{15,25})/gi)].map(m => m[1]);
+        
+        if (codes.length === 0) {
+            return;
+        }
+        
+        state.action = null; 
+        let report = `✅ *JOIN REPORT*\n`;
+        
+        for (let i = 0; i < codes.length; i++) {
+            try { 
+                await uClient.acceptInvite(codes[i]); 
+                report += `🔹 Joined: ${codes[i]} ✔️\n`; 
+                await new Promise(r => setTimeout(r, 2000)); 
+            } catch (e) { 
+                report += `🔹 Failed: ${codes[i]} ❌\n`; 
+            }
+        }
+        
+        return sendLongReport(chatId, report, 'Join_Report');
     }
 });
 
 // ============================================================================
-// ⚙️ 11. THE HEAVYWEIGHT ISOLATED ENGINES (100% UNCUT & ERROR-PROOFED)
+// ⚙️ 11. THE HEAVYWEIGHT ISOLATED ENGINES (FULLY UNCOMPRESSED)
 // ============================================================================
 
-// --- 11.1 MASS GROUP BUILDER ENGINE ---
 async function startGroupCreationProcess(chatId, userId, uClient) {
-    const config = getState(userId).groupConfig;
+    const config = getState(userId).groupConfig; 
     getState(userId).action = null; 
     
-    let statusMsg = await tgBot.sendMessage(chatId, `🚀 *DEPLOYMENT PROTOCOL ACTIVE*`, { parse_mode: 'Markdown' });
+    let statusMsg = await tgBot.sendMessage(chatId, `🚀 *DEPLOYMENT ACTIVE*`, { parse_mode: 'Markdown' }); 
     let resultMessage = `✅ *DEPLOYMENT REPORT*\n${DIVIDER}\n\n`;
-    let successCount = 0;
     
     let pfpMedia = null;
     if (config.pfpPath && fs.existsSync(config.pfpPath)) {
@@ -945,84 +1117,76 @@ async function startGroupCreationProcess(chatId, userId, uClient) {
 
     for (let i = 1; i <= config.count; i++) {
         const groupName = `${config.baseName} ${i}`;
+        
         try {
-            await tgBot.editMessageText(`⚙️ *Constructing...*\n${createProgressBar(i, config.count)}\nBuilding: *${groupName}*`, { chat_id: chatId, message_id: statusMsg.message_id, parse_mode: 'Markdown' });
+            await tgBot.editMessageText(`⚙️ *Constructing...*\n${createProgressBar(i, config.count)}`, { chat_id: chatId, message_id: statusMsg.message_id });
             
-            // 1. Execute Creation
-            const res = await uClient.createGroup(groupName, [config.memberId]);
+            const res = await uClient.createGroup(groupName, [config.memberId]); 
             await new Promise(r => setTimeout(r, 2000)); 
             
-            // 2. Fetch Fresh Data
             const chat = await uClient.getChatById(res.gid._serialized);
             
-            // 3. Apply Detailed Configurations
             if (config.desc) {
-                await chat.setDescription(config.desc).catch(()=>{});
+                await chat.setDescription(config.desc).catch(()=>{}); 
             }
             if (pfpMedia) {
                 await chat.setPicture(pfpMedia).catch(()=>{});
             }
             if (config.settings.msgsAdminOnly) {
-                await chat.setMessagesAdminsOnly(true).catch(()=>{});
+                await chat.setMessagesAdminsOnly(true).catch(()=>{}); 
             }
             if (config.settings.infoAdminOnly) {
                 await chat.setInfoAdminsOnly(true).catch(()=>{});
             }
-
-            // 4. Finalize & Extract Link
-            const link = await chat.getInviteCode();
-            resultMessage += `🔹 *${groupName}*\n🔗 \`https://chat.whatsapp.com/${link}\`\n\n`;
-            successCount++; 
             
-            // Anti-Ban Delay
+            const link = await chat.getInviteCode(); 
+            resultMessage += `🔹 *${groupName}*\n🔗 \`https://chat.whatsapp.com/${link}\`\n\n`; 
+            
             await new Promise(r => setTimeout(r, 3000)); 
-            
         } catch (e) { 
-            console.error(`Group Creation Error for ${groupName}:`, e.message);
             resultMessage += `🔹 *${groupName}*\n❌ Error: _${e.message}_\n\n`; 
         }
     }
     
-    // Server Memory Cleanup
     if (config.pfpPath && fs.existsSync(config.pfpPath)) {
         fs.unlinkSync(config.pfpPath);
     }
     
-    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
-    resultMessage += `🎯 *Total Built Successfully: ${successCount}/${config.count}*${FOOTER}`;
-    
-    return sendLongReport(chatId, resultMessage, 'Created_Groups', { disable_web_page_preview: true, reply_markup: { inline_keyboard: [[{text: '🔙 Return to Main Menu', callback_data: 'btn_main_menu'}]] } });
+    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
+    return sendLongReport(chatId, resultMessage + FOOTER, 'Created_Groups');
 }
 
-// --- 11.2 TACTICAL PURGE ENGINE ---
 async function runPurgeEngine(chatId, userId, uClient, inputString) {
-    const state = getState(userId);
+    const state = getState(userId); 
     const inputList = inputString.replace(/,/g, ' ').split(/\s+/).filter(p => p.trim() !== '');
     
-    const targetGroupIds = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g => g.id) : state.selectedGroupsArray;
+    const targetGroupIds = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g => g.id) : state.selectedGroupsArray; 
     state.action = null; 
     
-    let statusMsg = await tgBot.sendMessage(chatId, `⏳ *PURGE SEQUENCE INITIATED...*`, { parse_mode: 'Markdown' });
-    let totalKicked = 0;
+    let statusMsg = await tgBot.sendMessage(chatId, `⏳ *PURGING...*`, { parse_mode: 'Markdown' }); 
     let report = `✅ *PURGE REPORT*\n${DIVIDER}\n`;
 
     for (let i = 0; i < targetGroupIds.length; i++) {
         try {
-            const chat = await uClient.getChatById(targetGroupIds[i]);
-            await tgBot.editMessageText(`🔍 *Executing Purge...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id, parse_mode: 'Markdown' });
+            const chat = await uClient.getChatById(targetGroupIds[i]); 
+            await tgBot.editMessageText(`🔍 *Purging...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id });
             
             let targetsToRemove = [];
             
             for (const participant of chat.participants) {
-                if (participant.isAdmin || participant.isSuperAdmin) continue; 
+                if (participant.isAdmin || participant.isSuperAdmin) {
+                    continue; 
+                }
                 
                 let shouldKick = false;
-                for (const item of inputList) {
-                    let searchItem = item.startsWith('+') ? item.substring(1) : item;
+                
+                for (const item of inputList) { 
+                    let searchItem = item.startsWith('+') ? item.substring(1) : item; 
+                    
                     if (participant.id.user.startsWith(searchItem) || participant.id.user === searchItem) { 
                         shouldKick = true; 
                         break; 
-                    }
+                    } 
                 }
                 
                 if (shouldKick) {
@@ -1030,101 +1194,89 @@ async function runPurgeEngine(chatId, userId, uClient, inputString) {
                 }
             }
             
-            if (targetsToRemove.length > 0) {
-                await chat.removeParticipants(targetsToRemove);
-                totalKicked += targetsToRemove.length;
-                report += `🔹 *${chat.name}:* Terminated ${targetsToRemove.length} elements.\n`;
+            if (targetsToRemove.length > 0) { 
+                await chat.removeParticipants(targetsToRemove); 
+                report += `🔹 *${chat.name}:* Kicked ${targetsToRemove.length}\n`; 
                 await new Promise(r => setTimeout(r, 2000)); 
-            } else {
-                report += `🔹 *${chat.name}:* Clean. No targets found.\n`;
             }
         } catch (e) {
-            report += `🔹 *ID: ${targetGroupIds[i]}:* Access Denied / Error.\n`;
+            console.error(e);
         }
     }
     
-    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
-    report += `\n💀 *Total Global Casualties:* ${totalKicked}${FOOTER}`;
-    
-    return sendLongReport(chatId, report, 'Purge_Report', { reply_markup: { inline_keyboard: [[{text: '🔙 Return', callback_data: 'btn_main_menu'}]] } });
+    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
+    return sendLongReport(chatId, report + FOOTER, 'Purge_Report');
 }
 
-// --- 11.3 LINK SCRAPER ENGINE ---
 async function extractGroupLinksEngine(chatId, userId, uClient) {
-    const state = getState(userId);
-    const targetGroupIds = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g => g.id) : state.selectedGroupsArray;
-    state.action = null; 
+    const state = getState(userId); 
+    const targetGroupIds = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g => g.id) : state.selectedGroupsArray; 
     
-    let statusMsg = await tgBot.sendMessage(chatId, `⏳ *SCRAPING LINKS...*`, { parse_mode: 'Markdown' });
-    let resultMessage = `🔗 *CLASSIFIED LINK DATABASE*\n${DIVIDER}\n\n`;
+    state.action = null; 
+    let statusMsg = await tgBot.sendMessage(chatId, `⏳ *SCRAPING LINKS...*`, { parse_mode: 'Markdown' }); 
+    let resultMessage = `🔗 *LINK DATABASE*\n${DIVIDER}\n\n`;
 
     for (let i = 0; i < targetGroupIds.length; i++) {
         try {
-            const chat = await uClient.getChatById(targetGroupIds[i]);
-            await tgBot.editMessageText(`🔍 *Extracting data...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id, parse_mode: 'Markdown' });
+            const chat = await uClient.getChatById(targetGroupIds[i]); 
+            await tgBot.editMessageText(`🔍 *Extracting...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id });
             
-            const link = await chat.getInviteCode();
-            resultMessage += `🔹 *${chat.name}*\n🔗 \`https://chat.whatsapp.com/${link}\`\n\n`;
+            const link = await chat.getInviteCode(); 
+            resultMessage += `🔹 *${chat.name}*\n🔗 \`https://chat.whatsapp.com/${link}\`\n\n`; 
             
             await new Promise(r => setTimeout(r, 1000));
-        } catch (e) {
-            resultMessage += `🔹 *Group ID: ${targetGroupIds[i]}*\n❌ Extration Failed (Not an admin?).\n\n`;
+        } catch (e) { 
+            resultMessage += `🔹 ID: ${targetGroupIds[i]} ❌\n\n`; 
         }
     }
     
-    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
-    
-    return sendLongReport(chatId, resultMessage + FOOTER, 'Extracted_Links', { disable_web_page_preview: true, reply_markup: { inline_keyboard: [[{text: '🔙 Return', callback_data: 'btn_main_menu'}]] } });
+    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
+    return sendLongReport(chatId, resultMessage + FOOTER, 'Extracted_Links');
 }
 
-// --- 11.4 AUTO-APPROVE ENGINE ---
 async function autoApproveEngine(chatId, userId, uClient, mode) {
-    const state = getState(userId);
-    const targetGroupIds = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g => g.id) : state.selectedGroupsArray;
-    state.action = null; 
+    const state = getState(userId); 
+    const targetGroupIds = state.selectedGroupsArray === 'ALL' ? state.adminGroups.map(g => g.id) : state.selectedGroupsArray; 
     
-    let statusMsg = await tgBot.sendMessage(chatId, `⏳ *OVERRIDING APPROVAL GATES...*`, { parse_mode: 'Markdown' });
-    let report = `✅ *APPROVAL STATUS REPORT*\n${DIVIDER}\n`;
+    state.action = null; 
+    let statusMsg = await tgBot.sendMessage(chatId, `⏳ *APPROVING...*`, { parse_mode: 'Markdown' }); 
+    let report = `✅ *APPROVAL REPORT*\n${DIVIDER}\n`;
 
     for (let i = 0; i < targetGroupIds.length; i++) {
         try {
-            const chat = await uClient.getChatById(targetGroupIds[i]);
-            await tgBot.editMessageText(`👥 *Authorizing Access...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id, parse_mode: 'Markdown' });
+            const chat = await uClient.getChatById(targetGroupIds[i]); 
+            await tgBot.editMessageText(`👥 *Authorizing...*\n${createProgressBar(i+1, targetGroupIds.length)}`, { chat_id: chatId, message_id: statusMsg.message_id });
             
-            if (mode === 'OFF_SETTING') {
-                await chat.setGroupMembershipApprovalMode(false);
-                report += `🔹 *${chat.name}:* Gate Opened Permanently.\n`;
+            if (mode === 'OFF_SETTING') { 
+                await chat.setGroupMembershipApprovalMode(false); 
+                report += `🔹 *${chat.name}:* Gate Opened.\n`; 
             } else if (mode === 'MANUAL') {
                 const requests = await chat.getGroupMembershipRequests();
-                if (requests && requests.length > 0) {
-                    const requesterIds = requests.map(r => r.id._serialized || r.id.remote || r.author);
-                    await chat.approveGroupMembershipRequests(requesterIds);
-                    report += `🔹 *${chat.name}:* Let in +${requests.length} members.\n`;
-                } else {
-                    report += `🔹 *${chat.name}:* 0 requests pending.\n`;
+                
+                if (requests && requests.length > 0) { 
+                    const rIds = requests.map(r => r.id._serialized || r.id.remote || r.author); 
+                    await chat.approveGroupMembershipRequests(rIds); 
+                    report += `🔹 *${chat.name}:* Approved +${requests.length}\n`; 
                 }
             }
             
             await new Promise(r => setTimeout(r, 1500));
         } catch (e) {
-            report += `🔹 *Error processing ID: ${targetGroupIds[i]}*\n`;
+            console.error(e);
         }
     }
     
-    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{});
-    
-    return sendLongReport(chatId, report + FOOTER, 'Approval_Report', { reply_markup: { inline_keyboard: [[{text: '🔙 Return', callback_data: 'btn_main_menu'}]] } });
+    await tgBot.deleteMessage(chatId, statusMsg.message_id).catch(()=>{}); 
+    return sendLongReport(chatId, report + FOOTER, 'Approval_Report');
 }
 
 // ============================================================================
 // 🛑 12. GRACEFUL EXIT HANDLER
 // ============================================================================
 process.on('SIGINT', async () => {
-    console.log('\n(SIGINT) Triggered! Safely shutting down all active WhatsApp sessions...');
-    for (let userId in activeClients) {
+    for (let userId in activeClients) { 
         if (activeClients[userId] && activeClients[userId].client) {
-            await activeClients[userId].client.destroy().catch(()=>{});
-            console.log(`Destroyed session for User ${userId}`);
+            await activeClients[userId].client.destroy().catch(()=>{}); 
         }
     }
     process.exit(0);
