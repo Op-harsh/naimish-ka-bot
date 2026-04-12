@@ -20,12 +20,12 @@ process.on('unhandledRejection', (reason) => {
 const app = express();
 const port = process.env.PORT || 3000; 
 app.get('/', (req, res) => {
-    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 Supreme Master V36.0 (The Fortress) Active</h1>');
+    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 Supreme Master V37.0 (The Fortress) Active</h1>');
 });
 app.listen(port, () => console.log(`☁️ [SERVER] Web Interface Active on Port ${port}`));
 
 // ============================================================================
-// ⚙️ 3. CORE CONFIGURATION
+// ⚙️ 3. CORE CONFIGURATION (TURBO ENGINE UPGRADE)
 // ============================================================================
 const TELEGRAM_TOKEN = '8709803495:AAHfunw8KiTsFooEwdXKAbvknr2kdRCFMOI'; // 👈 APNA TOKEN YAHAN DAALO
 const OWNER_ID = 5524906942; // 👈 APNI ASLI TELEGRAM ID YAHAN DAALO
@@ -33,6 +33,7 @@ const OWNER_USERNAME = '@Naimish555';
 
 const tgBot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
+// 🔥 FASTER LOADING FLAGS ADDED HERE
 const puppeteerOptions = {
     headless: true,
     args: [
@@ -40,7 +41,10 @@ const puppeteerOptions = {
         '--disable-setuid-sandbox', 
         '--disable-dev-shm-usage', 
         '--single-process',
-        '--no-zygote'
+        '--no-zygote',
+        '--disable-gpu',
+        '--no-first-run',
+        '--disable-accelerated-2d-canvas'
     ]
 };
 
@@ -49,7 +53,7 @@ if (fs.existsSync('/data/data/com.termux/files/usr/bin/chromium-browser')) {
     console.log('📱 [SYSTEM] Termux Environment Detected. Using Local Chromium.');
 }
 
-console.log(`\n🔥 SUPREME MASTER V36.0 (FORTRESS EDITION) INITIALIZING...\n`);
+console.log(`\n🔥 SUPREME MASTER V37.0 (FORTRESS EDITION) INITIALIZING...\n`);
 
 // ============================================================================
 // 🧠 4. MULTI-TENANT STATE MANAGEMENT & DB
@@ -100,7 +104,7 @@ let adminConfig = {
 };
 
 const DIVIDER = '━━━━━━━━━━━━━━━━━━━━';
-const FOOTER = `\n${DIVIDER}\n👑 _Supreme System v36.0_ | Owner: ${OWNER_USERNAME}`;
+const FOOTER = `\n${DIVIDER}\n👑 _Supreme System v37.0_ | Owner: ${OWNER_USERNAME}`;
 
 // 🌐 MULTILINGUAL DICTIONARY
 const texts = {
@@ -183,14 +187,14 @@ function hasFeatureAccess(userId, featureKey) {
 }
 
 // ============================================================================
-// 🚀 6. WHATSAPP CLIENT INITIALIZER (THE BULLETPROOF PAIRING FIX)
+// 🚀 6. WHATSAPP CLIENT INITIALIZER (INSTANT AUTH & TURBO LOAD)
 // ============================================================================
 function startWhatsAppClient(userId, chatId, cleanNumber) {
     if (activeClients[userId] && activeClients[userId].status === 'initializing') {
         return tgBot.sendMessage(chatId, `⚠️ Ek process already background me chal rahi hai. Kripya wait karein!`);
     }
 
-    tgBot.sendMessage(chatId, `📡 *PHASE 1: Launching Sandbox Engine...*\nTermux par pehli baar load hone mein *20 se 40 seconds* lag sakte hain. Kripya aaram se wait karein!`, { parse_mode: 'Markdown' });
+    tgBot.sendMessage(chatId, `📡 *PHASE 1: Launching Turbo Engine...*\nTermux/Cloud engine start ho raha hai. Code aane me *15-30 seconds* lagenge.`, { parse_mode: 'Markdown' });
     
     let clientOpts = {
         authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), 
@@ -215,11 +219,22 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
             tgBot.sendMessage(chatId, `✅ *YOUR PAIRING CODE:*\n\nNumber: +${cleanNumber}\nToken: \`${code}\`\n\n_Isey apne WhatsApp "Linked Devices" > "Link with phone number" me dalein._`, { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '🔙 Main Menu', callback_data: 'btn_main_menu'}]] } });
         }
     });
+
+    // 🔥 NEW: INSTANT AUTHENTICATED TRIGGER (Fixes the Offline Loophole)
+    client.on('authenticated', () => {
+        if (activeClients[userId]) {
+            activeClients[userId].isReady = true; // FORCE ENGINE ONLINE IMMEDIATELY
+            activeClients[userId].status = 'connected';
+            tgBot.sendMessage(chatId, `✅ *INSTANT AUTH SUCCESS!*\nWhatsApp verify ho gaya hai. System Online!\nType /start to access your dashboard.`, { parse_mode: 'Markdown' }).catch(()=>{});
+        }
+    });
     
     client.on('ready', () => { 
-        activeClients[userId].isReady = true; 
-        activeClients[userId].status = 'connected';
-        tgBot.sendMessage(chatId, `🟢 *SUCCESS: WhatsApp Connected & Synchronized!*\nType /start to access your dashboard.`, { parse_mode: 'Markdown' }); 
+        if (activeClients[userId] && !activeClients[userId].isReady) {
+            activeClients[userId].isReady = true; 
+            activeClients[userId].status = 'connected';
+            tgBot.sendMessage(chatId, `🟢 *SUCCESS: Chat Synchronization Complete!*\nType /start to access your dashboard.`, { parse_mode: 'Markdown' }); 
+        }
     });
 
     client.on('disconnected', (reason) => {
@@ -262,9 +277,12 @@ if (fs.existsSync('./multi_sessions')) {
                 puppeteer: puppeteerOptions
             });
             activeClients[userId] = { client: client, status: 'resuming', isReady: false };
+            
+            client.on('authenticated', () => {
+                if (activeClients[userId]) { activeClients[userId].isReady = true; activeClients[userId].status = 'connected'; }
+            });
             client.on('ready', () => {
-                activeClients[userId].isReady = true;
-                activeClients[userId].status = 'connected';
+                if (activeClients[userId]) { activeClients[userId].isReady = true; activeClients[userId].status = 'connected'; }
             });
             client.initialize().catch(()=>{});
         }
