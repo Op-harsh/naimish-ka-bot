@@ -1,18 +1,21 @@
 {
-  "name": "supreme-master-bot",
-  "version": "36.0.0",
-  "description": "Multi-Session WhatsApp Telegram Bot",
+  "name": "supreme-master-v47",
+  "version": "47.0.0",
+  "description": "God-Tier Stealth WhatsApp Bot by Naimish",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "npm update whatsapp-web.js && node index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "node-telegram-bot-api": "^0.65.0",
-    "puppeteer": "^22.6.0",
-    "whatsapp-web.js": "^1.23.0"
+    "whatsapp-web.js": "latest",
+    "qrcode-terminal": "^0.12.0"
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "author": "NAIMISH Ff",
+  "license": "ISC"
 }
