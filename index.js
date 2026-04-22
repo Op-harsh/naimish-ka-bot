@@ -20,7 +20,7 @@ process.on('unhandledRejection', (reason) => {
 const app = express();
 const port = process.env.PORT || 8080;
 app.get('/', (req, res) => { 
-    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 VORTEX V48.3 (Premium Stealth) Active</h1>'); 
+    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 VORTEX V48.4 (Premium Stealth) Active</h1>'); 
 });
 app.listen(port, () => {
     console.log(`☁️ [SERVER] Web Interface Active on Port ${port}`);
@@ -57,7 +57,7 @@ if (fs.existsSync('/data/data/com.termux/files/usr/bin/chromium-browser')) {
     puppeteerOptions.executablePath = '/data/data/com.termux/files/usr/bin/chromium-browser';
 }
 
-console.log(`\n🔥 VORTEX V48.3 INITIALIZING...\n`);
+console.log(`\n🔥 VORTEX V48.4 INITIALIZING...\n`);
 
 // ============================================================================
 // 🧠 4. STATE MANAGEMENT, MEMORY MAPS & PERSISTENT DB
@@ -136,7 +136,7 @@ function getState(userId) {
 }
 
 const DIVIDER = '━━━━━━━━━━━━━━━━━━━━';
-const FOOTER = `\n${DIVIDER}\n👑 _VORTEX Sʏsᴛᴇᴍ V48.3_ | Oᴡɴᴇʀ: ${OWNER_USERNAME}`;
+const FOOTER = `\n${DIVIDER}\n👑 _VORTEX Sʏsᴛᴇᴍ V48.4_ | Oᴡɴᴇʀ: ${OWNER_USERNAME}`;
 
 const texts = {
     'Eɴɢʟɪsʜ': { 
@@ -251,24 +251,44 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
     const session = activeClients.get(userId);
     if (session && session.status === 'initializing') return safeSend(chatId, `⚠️ VORTEX ɪɴɪᴛɪᴀʟɪᴢᴀᴛɪᴏɴ ɪs ᴀʟʀᴇᴀᴅʏ ɪɴ ᴘʀᴏɢʀᴇss...`);
 
-    safeSend(chatId, `📡 *Pʜᴀsᴇ 1: Lᴀᴜɴᴄʜɪɴɢ VORTEX Eɴɢɪɴᴇ...*`);
-    // 🔥 V48.3 FIX: Removed the invalid option pairWithPhoneNumber. Now handled manually via API Hook.
-    const clientOptions = { authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), puppeteer: puppeteerOptions };
+    const sessionPath = path.join(__dirname, 'multi_sessions', `session-user_${userId}`);
+    
+    // 🔥 V48.4 FIX: Nuclear Wipe of Corrupted Ghost Sessions before Fresh Login
+    if (cleanNumber && fs.existsSync(sessionPath)) {
+        try { fs.rmSync(sessionPath, { recursive: true, force: true }); } catch(e) { console.log(e); }
+    }
 
+    safeSend(chatId, `📡 *Pʜᴀsᴇ 1: Lᴀᴜɴᴄʜɪɴɢ VORTEX Eɴɢɪɴᴇ...*`);
+    
+    const clientOptions = { authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), puppeteer: puppeteerOptions };
     const client = new Client(clientOptions);
     activeClients.set(userId, { client: client, status: 'initializing', isReady: false });
+
+    // 🔥 V48.4 FIX: 45-Second Watchdog Timer to prevent infinite stuck bugs
+    let watchdog = setTimeout(() => {
+        const cur = activeClients.get(userId);
+        if (cur && !cur.isReady) {
+            safeSend(chatId, `❌ *ENGINE TIMEOUT:*\nMᴇᴛᴀ API ᴅɪᴅ ɴᴏᴛ ʀᴇsᴘᴏɴᴅ ɪɴ 45s. (Tʜɪs ʜᴀᴘᴘᴇɴs ᴅᴜᴇ ᴛᴏ WʜᴀᴛsAᴘᴘ sᴇʀᴠᴇʀ ʟᴀɢ). Kɪʟʟɪɴɢ ɢʜᴏsᴛ ᴘʀᴏᴄᴇss... Pʟᴇᴀsᴇ ᴄʟɪᴄᴋ Lᴏɢɪɴ ᴀɢᴀɪɴ.`);
+            activeClients.delete(userId);
+            client.destroy().catch(()=>{});
+            if (fs.existsSync(sessionPath)) { try { fs.rmSync(sessionPath, { recursive: true, force: true }); } catch(e){} }
+        }
+    }, 45000);
     
-    // 🔥 V48.3 THE FIX: Real Pairing Code Interception from QR Event
     let pairingCodeRequested = false;
     client.on('qr', async (qr) => { 
         if (cleanNumber && !pairingCodeRequested) {
             pairingCodeRequested = true;
+            // Provide live feedback so user doesn't think it's stuck
+            safeSend(chatId, `⏳ *Bʏᴘᴀssɪɴɢ QR... Rᴇǫᴜᴇsᴛɪɴɢ 8-Dɪɢɪᴛ Cᴏᴅᴇ ғʀᴏᴍ Mᴇᴛᴀ API...*`);
             try {
-                await new Promise(r => setTimeout(r, 2500)); // Crucial delay to let Meta API generate code
+                await new Promise(r => setTimeout(r, 3000)); // Delay allows Meta API to sync
                 const code = await client.requestPairingCode(cleanNumber);
                 const formattedCode = code ? code.match(/.{1,4}/g).join('-') : 'UNKNOWN';
+                clearTimeout(watchdog); // Success! Stop watchdog timer
                 safeSend(chatId, `✅ *AUTHENTICATION CODE:*\n\nNᴜᴍʙᴇʀ: +${cleanNumber}\nTᴏᴋᴇɴ: \`${formattedCode}\`\n\n_Eɴᴛᴇʀ ᴛʜɪs ᴄᴏᴅᴇ ɪɴ ʏᴏᴜʀ Lɪɴᴋᴇᴅ Dᴇᴠɪᴄᴇs sᴇᴄᴛɪᴏɴ ᴏɴ WʜᴀᴛsAᴘᴘ._`);
             } catch (err) {
+                clearTimeout(watchdog);
                 safeSend(chatId, `❌ Cᴏᴅᴇ Gᴇɴᴇʀᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ: ${err.message}\n_Rᴇ-ᴄʜᴇᴄᴋ ᴛʜᴇ ɴᴜᴍʙᴇʀ ᴏʀ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ._`);
                 pairingCodeRequested = false;
             }
@@ -276,10 +296,13 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
     });
 
     client.on('authenticated', () => { 
+        clearTimeout(watchdog);
         const currentSession = activeClients.get(userId);
         if (currentSession) { currentSession.isReady = true; currentSession.status = 'connected'; safeSend(chatId, `✅ *AUTHENTICATION SUCCESSFUL*\nWʜᴀᴛsAᴘᴘ sᴇssɪᴏɴ ᴠᴇʀɪғɪᴇᴅ. Tʏᴘᴇ /start ᴛᴏ ᴀᴄᴄᴇss ᴅᴀsʜʙᴏᴀʀᴅ.`); } 
     });
+
     client.on('ready', () => { 
+        clearTimeout(watchdog);
         const currentSession = activeClients.get(userId);
         if (currentSession) { currentSession.isReady = true; currentSession.status = 'connected'; } 
     });
@@ -288,8 +311,7 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
         safeSend(chatId, `🚨 *YOUR WA DISCONNECTED*\nRᴇᴀsᴏɴ: ${reason}\n\nSᴇssɪᴏɴ ᴇxᴘɪʀᴇᴅ. Pʜɪʀsᴇ ʟᴏɢɪɴ ᴋᴀʀᴏ!`); 
         activeClients.delete(userId); 
         await client.destroy().catch(()=>{}); 
-        const sessionPath = path.join(__dirname, 'multi_sessions', `session-user_${userId}`);
-        if (fs.existsSync(sessionPath)) fs.rmSync(sessionPath, { recursive: true, force: true });
+        if (fs.existsSync(sessionPath)) { try { fs.rmSync(sessionPath, { recursive: true, force: true }); } catch(e){} }
     });
     
     client.on('message', async (msg) => {
@@ -351,7 +373,11 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
         } catch (e) {}
     });
     
-    client.initialize().catch(async (e) => { activeClients.delete(userId); await client.destroy().catch(()=>{}); });
+    client.initialize().catch(async (e) => { 
+        clearTimeout(watchdog);
+        activeClients.delete(userId); 
+        await client.destroy().catch(()=>{}); 
+    });
 }
 
 if (fs.existsSync('./multi_sessions')) {
