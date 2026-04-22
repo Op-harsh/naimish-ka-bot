@@ -3,6 +3,9 @@ const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs'); 
 const path = require('path');
 const express = require('express');
+const puppeteer = require("puppeteer");
+
+process.setMaxListeners(50);
 
 // ============================================================================
 // 🛡️ 1. GLOBAL ANTI-CRASH SHIELD
@@ -20,7 +23,7 @@ process.on('unhandledRejection', (reason) => {
 const app = express();
 const port = process.env.PORT || 8080;
 app.get('/', (req, res) => { 
-    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 VORTEX V51 (Live Diagnostic Engine) Active</h1>'); 
+    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 VORTEX V52 (Dependency Fix Engine) Active</h1>'); 
 });
 app.listen(port, () => {
     console.log(`☁️ [SERVER] Web Interface Active on Port ${port}`);
@@ -35,25 +38,23 @@ const OWNER_USERNAME = '@Naimish555';
 
 const tgBot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
-// 🔥 V51 FIX: REMOVED '--single-process' WHICH CAUSES SILENT HANGS ON LINUX/RAILWAY
-const puppeteerOptions = {
-    headless: 'new', 
-    args: [
-        '--no-sandbox', 
-        '--disable-setuid-sandbox', 
-        '--disable-dev-shm-usage', 
-        '--disable-gpu', 
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-extensions'
-    ]
+// 🔥 V52 FIX: REQUIRED PUPPETEER CONFIGURATION
+const puppeteerOptions = { 
+    headless: true, 
+    executablePath: puppeteer.executablePath(), 
+    args: [ 
+        "--no-sandbox", 
+        "--disable-setuid-sandbox", 
+        "--disable-dev-shm-usage", 
+        "--disable-gpu", 
+        "--no-zygote", 
+        "--no-first-run", 
+        "--disable-extensions", 
+        "--disable-features=site-per-process" 
+    ] 
 };
 
-if (fs.existsSync('/data/data/com.termux/files/usr/bin/chromium-browser')) {
-    puppeteerOptions.executablePath = '/data/data/com.termux/files/usr/bin/chromium-browser';
-}
-
-console.log(`\n🔥 VORTEX V51 INITIALIZING...\n`);
+console.log(`\n🔥 VORTEX V52 INITIALIZING...\n`);
 
 // ============================================================================
 // 🧠 4. STATE MANAGEMENT, MEMORY MAPS & PERSISTENT DB
@@ -132,7 +133,7 @@ function getState(userId) {
 }
 
 const DIVIDER = '━━━━━━━━━━━━━━━━━━━━';
-const FOOTER = `\n${DIVIDER}\n👑 _VORTEX Sʏsᴛᴇᴍ V51_ | Oᴡɴᴇʀ: ${OWNER_USERNAME}`;
+const FOOTER = `\n${DIVIDER}\n👑 _VORTEX Sʏsᴛᴇᴍ V52_ | Oᴡɴᴇʀ: ${OWNER_USERNAME}`;
 
 const texts = {
     'Eɴɢʟɪsʜ': { 
@@ -241,7 +242,7 @@ function hasFeatureAccess(userId, featureKey) {
 }
 
 // ============================================================================
-// 🚀 6. WHATSAPP ENGINE (V51 - LIVE DIAGNOSTICS & CRASH CATCHER)
+// 🚀 6. WHATSAPP ENGINE (V52 - DEPENDENCY FIX EDITION)
 // ============================================================================
 function startWhatsAppClient(userId, chatId, cleanNumber) {
     const session = activeClients.get(userId);
@@ -259,10 +260,16 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
         puppeteer: puppeteerOptions
     };
     
-    const client = new Client(clientOptions);
+    // 🔥 V52 FIX: SAFE INITIALIZATION
+    let client; 
+    try { 
+        client = new Client(clientOptions); 
+    } catch (err) { 
+        return safeSend(chatId, `❌ Client Init Failed: ${err.message}`); 
+    }
+
     activeClients.set(userId, { client: client, status: 'initializing', isReady: false });
 
-    // 🔥 V51: LIVE LOADING SCREEN TRACKER
     client.on('loading_screen', (percent, message) => {
         safeSend(chatId, `🕸️ *Pʜᴀsᴇ 2: WʜᴀᴛsAᴘᴘ Lᴏᴀᴅɪɴɢ...*\n📊 Pʀᴏɢʀᴇss: ${percent}%\n📝 Lᴏɢ: _${message}_`);
     });
@@ -386,13 +393,18 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
         } catch (e) {}
     });
     
-    // 🔥 V51 FIX: LIVE ERROR CATCHER TO TELEGRAM
-    client.initialize().catch(async (e) => { 
-        clearTimeout(watchdog);
-        safeSend(chatId, `❌ *CRITICAL SYSTEM CRASH!*\n\nSᴇʀᴠᴇʀ ɴᴇ Pᴜᴘᴘᴇᴛᴇᴇʀ (Cʜʀᴏᴍᴇ) ᴋᴏ ʙʟᴏᴄᴋ ᴋᴀʀ ᴅɪʏᴀ ʜᴀɪ.\n*Eʀʀᴏʀ:* \`${e.message}\`\n\n_Bʜᴀɪ ᴛᴇʀᴀ sᴇʀᴠᴇʀ Cʜʀᴏᴍᴇ sᴜᴘᴘᴏʀᴛ ɴᴀʜɪ ᴋᴀʀ ʀᴀʜᴀ ʏᴀ RAM ᴋʜᴀᴛᴀᴍ ʜᴏ ɢᴀʏɪ ʜᴀɪ!_`);
-        activeClients.delete(userId); 
-        await client.destroy().catch(()=>{}); 
-    });
+    // 🔥 V52 FIX: ASYNC/AWAIT INITIALIZATION FIX
+    (async () => { 
+        try { 
+            await client.initialize(); 
+        } catch (e) { 
+            console.error("INIT ERROR:", e);
+            clearTimeout(watchdog);
+            safeSend(chatId, `❌ *CRITICAL ERROR:*\n${e.message}\n\n_Likely cause: Missing Chrome dependencies or unsupported hosting._`);
+            activeClients.delete(userId); 
+            try { await client.destroy(); } catch {} 
+        } 
+    })();
 }
 
 if (fs.existsSync('./multi_sessions')) {
