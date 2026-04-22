@@ -20,7 +20,7 @@ process.on('unhandledRejection', (reason) => {
 const app = express();
 const port = process.env.PORT || 8080;
 app.get('/', (req, res) => { 
-    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 VORTEX V48.4 (Premium Stealth) Active</h1>'); 
+    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 VORTEX V48.5 (Anti-Hang Edition) Active</h1>'); 
 });
 app.listen(port, () => {
     console.log(`☁️ [SERVER] Web Interface Active on Port ${port}`);
@@ -57,7 +57,7 @@ if (fs.existsSync('/data/data/com.termux/files/usr/bin/chromium-browser')) {
     puppeteerOptions.executablePath = '/data/data/com.termux/files/usr/bin/chromium-browser';
 }
 
-console.log(`\n🔥 VORTEX V48.4 INITIALIZING...\n`);
+console.log(`\n🔥 VORTEX V48.5 INITIALIZING...\n`);
 
 // ============================================================================
 // 🧠 4. STATE MANAGEMENT, MEMORY MAPS & PERSISTENT DB
@@ -136,7 +136,7 @@ function getState(userId) {
 }
 
 const DIVIDER = '━━━━━━━━━━━━━━━━━━━━';
-const FOOTER = `\n${DIVIDER}\n👑 _VORTEX Sʏsᴛᴇᴍ V48.4_ | Oᴡɴᴇʀ: ${OWNER_USERNAME}`;
+const FOOTER = `\n${DIVIDER}\n👑 _VORTEX Sʏsᴛᴇᴍ V48.5_ | Oᴡɴᴇʀ: ${OWNER_USERNAME}`;
 
 const texts = {
     'Eɴɢʟɪsʜ': { 
@@ -245,51 +245,54 @@ function hasFeatureAccess(userId, featureKey) {
 }
 
 // ============================================================================
-// 🚀 6. WHATSAPP ENGINE (MEMORY OPTIMIZED MAPS & FIX)
+// 🚀 6. WHATSAPP ENGINE (V48.5 - ANTI INFINITE HANG FIX)
 // ============================================================================
 function startWhatsAppClient(userId, chatId, cleanNumber) {
     const session = activeClients.get(userId);
-    if (session && session.status === 'initializing') return safeSend(chatId, `⚠️ VORTEX ɪɴɪᴛɪᴀʟɪᴢᴀᴛɪᴏɴ ɪs ᴀʟʀᴇᴀᴅʏ ɪɴ ᴘʀᴏɢʀᴇss...`);
+    if (session && session.status === 'initializing') return safeSend(chatId, `⚠️ VORTEX ɪɴɪᴛɪᴀʟɪᴢᴀᴛɪᴏɴ ɪs ᴀʟʀᴇᴀᴅʏ ɪɴ ᴘʀᴏɢʀᴇss... Pʟᴇᴀsᴇ ᴡᴀɪᴛ.`);
 
     const sessionPath = path.join(__dirname, 'multi_sessions', `session-user_${userId}`);
-    
-    // 🔥 V48.4 FIX: Nuclear Wipe of Corrupted Ghost Sessions before Fresh Login
     if (cleanNumber && fs.existsSync(sessionPath)) {
-        try { fs.rmSync(sessionPath, { recursive: true, force: true }); } catch(e) { console.log(e); }
+        try { fs.rmSync(sessionPath, { recursive: true, force: true }); } catch(e) { }
     }
 
     safeSend(chatId, `📡 *Pʜᴀsᴇ 1: Lᴀᴜɴᴄʜɪɴɢ VORTEX Eɴɢɪɴᴇ...*`);
     
-    const clientOptions = { authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), puppeteer: puppeteerOptions };
+    // 🔥 V48.5 FIX: webVersionCache set to 'none' prevents infinite loading screen hang
+    const clientOptions = { 
+        authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), 
+        puppeteer: puppeteerOptions,
+        webVersionCache: { type: 'none' } 
+    };
+    
     const client = new Client(clientOptions);
     activeClients.set(userId, { client: client, status: 'initializing', isReady: false });
 
-    // 🔥 V48.4 FIX: 45-Second Watchdog Timer to prevent infinite stuck bugs
+    // 🔥 V48.5 FIX: Immediate Watchdog to prevent silent Puppeteer crashes
     let watchdog = setTimeout(() => {
         const cur = activeClients.get(userId);
         if (cur && !cur.isReady) {
-            safeSend(chatId, `❌ *ENGINE TIMEOUT:*\nMᴇᴛᴀ API ᴅɪᴅ ɴᴏᴛ ʀᴇsᴘᴏɴᴅ ɪɴ 45s. (Tʜɪs ʜᴀᴘᴘᴇɴs ᴅᴜᴇ ᴛᴏ WʜᴀᴛsAᴘᴘ sᴇʀᴠᴇʀ ʟᴀɢ). Kɪʟʟɪɴɢ ɢʜᴏsᴛ ᴘʀᴏᴄᴇss... Pʟᴇᴀsᴇ ᴄʟɪᴄᴋ Lᴏɢɪɴ ᴀɢᴀɪɴ.`);
+            safeSend(chatId, `❌ *ENGINE TIMEOUT:*\nMᴇᴛᴀ API ɪs ᴜɴʀᴇsᴘᴏɴsɪᴠᴇ. Bᴏᴛ ᴡᴀs sᴛᴜᴄᴋ ᴏɴ WʜᴀᴛsAᴘᴘ Lᴏᴀᴅɪɴɢ sᴄʀᴇᴇɴ. Pʀᴏᴄᴇss ᴋɪʟʟᴇᴅ. Pʟᴇᴀsᴇ ᴄʟɪᴄᴋ Lᴏɢɪɴ ᴀɢᴀɪɴ.`);
             activeClients.delete(userId);
             client.destroy().catch(()=>{});
             if (fs.existsSync(sessionPath)) { try { fs.rmSync(sessionPath, { recursive: true, force: true }); } catch(e){} }
         }
-    }, 45000);
+    }, 40000);
     
     let pairingCodeRequested = false;
     client.on('qr', async (qr) => { 
         if (cleanNumber && !pairingCodeRequested) {
             pairingCodeRequested = true;
-            // Provide live feedback so user doesn't think it's stuck
-            safeSend(chatId, `⏳ *Bʏᴘᴀssɪɴɢ QR... Rᴇǫᴜᴇsᴛɪɴɢ 8-Dɪɢɪᴛ Cᴏᴅᴇ ғʀᴏᴍ Mᴇᴛᴀ API...*`);
+            clearTimeout(watchdog); // Engine didn't hang! We reached QR stage.
+            safeSend(chatId, `⏳ *Eɴɢɪɴᴇ Sʏɴᴄᴇᴅ! Rᴇǫᴜᴇsᴛɪɴɢ 8-Dɪɢɪᴛ Cᴏᴅᴇ...*`);
+            
             try {
-                await new Promise(r => setTimeout(r, 3000)); // Delay allows Meta API to sync
+                await new Promise(r => setTimeout(r, 2000)); // Delay to stabilize API
                 const code = await client.requestPairingCode(cleanNumber);
                 const formattedCode = code ? code.match(/.{1,4}/g).join('-') : 'UNKNOWN';
-                clearTimeout(watchdog); // Success! Stop watchdog timer
                 safeSend(chatId, `✅ *AUTHENTICATION CODE:*\n\nNᴜᴍʙᴇʀ: +${cleanNumber}\nTᴏᴋᴇɴ: \`${formattedCode}\`\n\n_Eɴᴛᴇʀ ᴛʜɪs ᴄᴏᴅᴇ ɪɴ ʏᴏᴜʀ Lɪɴᴋᴇᴅ Dᴇᴠɪᴄᴇs sᴇᴄᴛɪᴏɴ ᴏɴ WʜᴀᴛsAᴘᴘ._`);
             } catch (err) {
-                clearTimeout(watchdog);
-                safeSend(chatId, `❌ Cᴏᴅᴇ Gᴇɴᴇʀᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ: ${err.message}\n_Rᴇ-ᴄʜᴇᴄᴋ ᴛʜᴇ ɴᴜᴍʙᴇʀ ᴏʀ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ._`);
+                safeSend(chatId, `❌ Cᴏᴅᴇ Gᴇɴᴇʀᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ: ${err.message}\n_Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ._`);
                 pairingCodeRequested = false;
             }
         }
