@@ -20,7 +20,7 @@ process.on('unhandledRejection', (reason) => {
 const app = express();
 const port = process.env.PORT || 8080;
 app.get('/', (req, res) => { 
-    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 VORTEX V48.1 (Premium Stealth) Active</h1>'); 
+    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 VORTEX V48.3 (Premium Stealth) Active</h1>'); 
 });
 app.listen(port, () => {
     console.log(`☁️ [SERVER] Web Interface Active on Port ${port}`);
@@ -57,7 +57,7 @@ if (fs.existsSync('/data/data/com.termux/files/usr/bin/chromium-browser')) {
     puppeteerOptions.executablePath = '/data/data/com.termux/files/usr/bin/chromium-browser';
 }
 
-console.log(`\n🔥 VORTEX V48.1 INITIALIZING...\n`);
+console.log(`\n🔥 VORTEX V48.3 INITIALIZING...\n`);
 
 // ============================================================================
 // 🧠 4. STATE MANAGEMENT, MEMORY MAPS & PERSISTENT DB
@@ -136,9 +136,8 @@ function getState(userId) {
 }
 
 const DIVIDER = '━━━━━━━━━━━━━━━━━━━━';
-const FOOTER = `\n${DIVIDER}\n👑 _VORTEX Sʏsᴛᴇᴍ V48.1_ | Oᴡɴᴇʀ: ${OWNER_USERNAME}`;
+const FOOTER = `\n${DIVIDER}\n👑 _VORTEX Sʏsᴛᴇᴍ V48.3_ | Oᴡɴᴇʀ: ${OWNER_USERNAME}`;
 
-// 🔥 V48: SMALL CAPS FONT UPGRADE FOR UI
 const texts = {
     'Eɴɢʟɪsʜ': { 
         menuTitle: "🤖 *VORTEX DASHBOARD*", statusLabel: "📡 Sᴛᴀᴛᴜs",
@@ -193,7 +192,6 @@ async function sendLongReport(chatId, text, filename, options = {}) {
     } else { safeSend(chatId, text, options); }
 }
 
-// 🔥 V48.1: ROGUE ADMIN LOOPHOLE PATCHED
 async function checkAccess(userId, chatId, msgObj = null) {
     if (!knownBotUsers.includes(userId)) { 
         knownBotUsers.push(userId);
@@ -204,10 +202,8 @@ async function checkAccess(userId, chatId, msgObj = null) {
         }
     }
 
-    // Absolute God Mode for Owner
     if (userId === OWNER_ID) return true;
     
-    // Strict Ban & Revoke checks executed BEFORE Admin checks!
     if (adminConfig.bannedUsers.includes(userId)) { 
         safeSend(chatId, `🚫 *ACCESS RESTRICTED*\nYᴏᴜʀ ᴀᴄᴄᴇss ʜᴀs ʙᴇᴇɴ sᴜsᴘᴇɴᴅᴇᴅ ʙʏ VORTEX Aᴅᴍɪɴ.`); 
         return false; 
@@ -218,10 +214,8 @@ async function checkAccess(userId, chatId, msgObj = null) {
         return false; 
     }
 
-    // If clean, Admins get free pass
     if (adminConfig.admins.includes(userId)) return true;
 
-    // Normal User Checks
     if (adminConfig.approvalRequired && !adminConfig.allowedUsers.includes(userId)) { 
         safeSend(chatId, `🔒 *AUTHORIZATION REQUIRED*\nAᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Pʟᴇᴀsᴇ ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴀᴅᴍɪɴɪsᴛʀᴀᴛᴏʀ.`); 
         return false; 
@@ -251,20 +245,36 @@ function hasFeatureAccess(userId, featureKey) {
 }
 
 // ============================================================================
-// 🚀 6. WHATSAPP ENGINE (MEMORY OPTIMIZED MAPS)
+// 🚀 6. WHATSAPP ENGINE (MEMORY OPTIMIZED MAPS & FIX)
 // ============================================================================
 function startWhatsAppClient(userId, chatId, cleanNumber) {
     const session = activeClients.get(userId);
     if (session && session.status === 'initializing') return safeSend(chatId, `⚠️ VORTEX ɪɴɪᴛɪᴀʟɪᴢᴀᴛɪᴏɴ ɪs ᴀʟʀᴇᴀᴅʏ ɪɴ ᴘʀᴏɢʀᴇss...`);
 
     safeSend(chatId, `📡 *Pʜᴀsᴇ 1: Lᴀᴜɴᴄʜɪɴɢ VORTEX Eɴɢɪɴᴇ...*`);
+    // 🔥 V48.3 FIX: Removed the invalid option pairWithPhoneNumber. Now handled manually via API Hook.
     const clientOptions = { authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), puppeteer: puppeteerOptions };
-    if (cleanNumber) clientOptions.pairWithPhoneNumber = { phoneNumber: cleanNumber };
 
     const client = new Client(clientOptions);
     activeClients.set(userId, { client: client, status: 'initializing', isReady: false });
     
-    client.on('code', (code) => { safeSend(chatId, `✅ *AUTHENTICATION CODE:*\n\nNᴜᴍʙᴇʀ: +${cleanNumber}\nTᴏᴋᴇɴ: \`${code}\``); });
+    // 🔥 V48.3 THE FIX: Real Pairing Code Interception from QR Event
+    let pairingCodeRequested = false;
+    client.on('qr', async (qr) => { 
+        if (cleanNumber && !pairingCodeRequested) {
+            pairingCodeRequested = true;
+            try {
+                await new Promise(r => setTimeout(r, 2500)); // Crucial delay to let Meta API generate code
+                const code = await client.requestPairingCode(cleanNumber);
+                const formattedCode = code ? code.match(/.{1,4}/g).join('-') : 'UNKNOWN';
+                safeSend(chatId, `✅ *AUTHENTICATION CODE:*\n\nNᴜᴍʙᴇʀ: +${cleanNumber}\nTᴏᴋᴇɴ: \`${formattedCode}\`\n\n_Eɴᴛᴇʀ ᴛʜɪs ᴄᴏᴅᴇ ɪɴ ʏᴏᴜʀ Lɪɴᴋᴇᴅ Dᴇᴠɪᴄᴇs sᴇᴄᴛɪᴏɴ ᴏɴ WʜᴀᴛsAᴘᴘ._`);
+            } catch (err) {
+                safeSend(chatId, `❌ Cᴏᴅᴇ Gᴇɴᴇʀᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ: ${err.message}\n_Rᴇ-ᴄʜᴇᴄᴋ ᴛʜᴇ ɴᴜᴍʙᴇʀ ᴏʀ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ._`);
+                pairingCodeRequested = false;
+            }
+        }
+    });
+
     client.on('authenticated', () => { 
         const currentSession = activeClients.get(userId);
         if (currentSession) { currentSession.isReady = true; currentSession.status = 'connected'; safeSend(chatId, `✅ *AUTHENTICATION SUCCESSFUL*\nWʜᴀᴛsAᴘᴘ sᴇssɪᴏɴ ᴠᴇʀɪғɪᴇᴅ. Tʏᴘᴇ /start ᴛᴏ ᴀᴄᴄᴇss ᴅᴀsʜʙᴏᴀʀᴅ.`); } 
@@ -377,13 +387,17 @@ function sendAdminPanel(chatId, userId) {
 
 function sendShieldMenu(chatId, userId, msgId = null) {
     const sec = getSecurityConfig(userId);
+    const isEng = getState(userId).language === 'Eɴɢʟɪsʜ';
+    
     let targetText = '🌐 ALL GROUPS';
     if (sec.targetMode === 'SELECTED') targetText = `🎯 SELECTED (${sec.targetGroups.length})`;
     else if (sec.targetMode === 'LINKS') targetText = `🔗 VIA LINKS (${sec.targetGroups.length})`;
     
     let modeHelp = sec.ruleType === 'WHITELIST' 
-        ? "ℹ️ *INFO:* Sɪʀғ ᴡᴀʜɪ ᴅᴇsʜ MSG ᴋᴀʀ ᴘᴀʏᴇɴɢᴇ ᴊᴏ ʟɪsᴛ ᴍᴇ ʜᴀɪɴ. Bᴀᴀᴋɪ sᴀʙ ᴅᴇʟᴇᴛᴇ ʜᴏɴɢᴇ!" 
-        : "ℹ️ *INFO:* Jᴏ ᴅᴇsʜ ʟɪsᴛ ᴍᴇ ʜᴀɪɴ, ᴜɴᴋᴇ MSG ᴛᴜʀᴀɴᴛ ᴅᴇʟᴇᴛᴇ ʜᴏɴɢᴇ!";
+        ? (isEng ? "ℹ️ *INFO:* Oɴʟʏ ᴄᴏᴜɴᴛʀɪᴇs ɪɴ ᴛʜɪs ʟɪsᴛ ᴄᴀɴ ᴍᴇssᴀɢᴇ. Oᴛʜᴇʀs ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ!" : "ℹ️ *INFO:* Sɪʀғ ᴡᴀʜɪ ᴅᴇsʜ MSG ᴋᴀʀ ᴘᴀʏᴇɴɢᴇ ᴊᴏ ʟɪsᴛ ᴍᴇ ʜᴀɪɴ. Bᴀᴀᴋɪ sᴀʙ ᴅᴇʟᴇᴛᴇ ʜᴏɴɢᴇ!")
+        : (isEng ? "ℹ️ *INFO:* Cᴏᴜɴᴛʀɪᴇs ɪɴ ᴛʜɪs ʟɪsᴛ ᴡɪʟʟ ʙᴇ ɪɴsᴛᴀɴᴛʟʏ ᴅᴇʟᴇᴛᴇᴅ!" : "ℹ️ *INFO:* Jᴏ ᴅᴇsʜ ʟɪsᴛ ᴍᴇ ʜᴀɪɴ, ᴜɴᴋᴇ MSG ᴛᴜʀᴀɴᴛ ᴅᴇʟᴇᴛᴇ ʜᴏɴɢᴇ!");
+        
+    let helpBtnText = isEng ? '📖 Hᴏᴡ ᴅᴏᴇs ᴛʜɪs ᴡᴏʀᴋ?' : '📖 Yᴇ Kᴀɪsᴇ Kᴀᴀᴍ Kᴀʀᴛᴀ ʜᴀɪ?';
 
     const txt = `🛡️ *AUTO DELETE GC MSG*\n${DIVIDER}\n` +
                 `*Mᴀsᴛᴇʀ Pᴏᴡᴇʀ:* ${sec.enabled ? '🟢 ONLINE' : '🔴 OFFLINE'}\n` +
@@ -402,7 +416,7 @@ function sendShieldMenu(chatId, userId, msgId = null) {
             [{ text: `⚡ Aᴜᴛᴏ-Kɪᴄᴋ: ${sec.autoKickEnabled ? '🟢 ON' : '🔴 OFF'}`, callback_data: 'sec_toggle_autokick' }],
             [{ text: `➕ Aᴅᴅ Cᴏᴅᴇ (+91)`, callback_data: 'sec_add_country' }, { text: `➖ Rᴇᴍᴏᴠᴇ Cᴏᴅᴇ`, callback_data: 'sec_rem_country' }],
             [{ text: `👑 Aᴅᴅ VIP Nᴜᴍʙᴇʀ`, callback_data: 'sec_add_vip' }, { text: `➖ Rᴇᴍᴏᴠᴇ VIP`, callback_data: 'sec_rem_vip' }],
-            [{ text: '📖 Yᴇ Kᴀɪsᴇ Kᴀᴀᴍ Kᴀʀᴛᴀ ʜᴀɪ?', callback_data: 'sec_help_guide' }],
+            [{ text: helpBtnText, callback_data: 'sec_help_guide' }],
             [{ text: '🔙 Bᴀᴄᴋ ᴛᴏ Mᴇɴᴜ', callback_data: 'btn_main_menu' }]
         ]
     };
@@ -478,8 +492,11 @@ tgBot.on('callback_query', async (query) => {
     }
 
     if (data === 'sec_help_guide') {
-        const helpText = `📖 *HOW THIS WORKS*\n\n1. *Add Code (+91):* Aɢᴀʀ ᴀᴀᴘ ᴄʜᴀʜᴛᴇ ʜᴀɪɴ ᴋɪ sɪʀғ Iɴᴅɪᴀɴ ɴᴜᴍʙᴇʀs ᴍᴇssᴀɢᴇ ᴋᴀʀᴇɪɴ, ᴛᴏʜ +91 ᴀᴅᴅ ᴋᴀʀᴇɪɴ.\n2. *VIP Number:* Aɢᴀʀ ᴋɪsɪ ᴋᴀ ɴᴜᴍʙᴇʀ VIP ʟɪsᴛ ᴍᴇ ʜᴀɪ, ᴛᴏʜ ʙᴏᴛ ᴜsᴋᴏ ᴋᴀʙʜɪ ᴅᴇʟᴇᴛᴇ ɴᴀʜɪ ᴋᴀʀᴇɢᴀ.\n3. *Auto-Kick:* Aɢᴀʀ ᴋᴏɪ ʙᴀᴀʀ-ʙᴀᴀʀ ʀᴜʟᴇs ᴛᴏᴅᴛᴀ ʜᴀɪ, ᴛᴏʜ 3 ᴍᴇssᴀɢᴇs ᴅᴇʟᴇᴛᴇ ʜᴏɴᴇ ᴋᴇ ʙᴀᴀᴅ ʙᴏᴛ ᴜsᴋᴏ ɢʀᴏᴜᴘ sᴇ ɴɪᴋᴀʟ ᴅᴇɢᴀ.`;
-        return tgBot.answerCallbackQuery(query.id, { text: helpText, show_alert: true });
+        const isEng = state.language === 'Eɴɢʟɪsʜ';
+        const helpText = isEng 
+            ? `📖 *HOW THIS WORKS*\n\n1. *Add Code (+91):* Iғ ʏᴏᴜ ᴏɴʟʏ ᴡᴀɴᴛ Iɴᴅɪᴀɴ ɴᴜᴍʙᴇʀs ᴛᴏ ᴍᴇssᴀɢᴇ, ᴀᴅᴅ 91.\n2. *VIP Number:* Tʜᴇ ʙᴏᴛ ᴡɪʟʟ NEVER ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇs ғʀᴏᴍ ɴᴜᴍʙᴇʀs ɪɴ ᴛʜɪs ʟɪsᴛ.\n3. *Auto-Kick:* Iғ sᴏᴍᴇᴏɴᴇ ʙʀᴇᴀᴋs ʀᴜʟᴇs 3 ᴛɪᴍᴇs, ᴛʜᴇʏ ᴡɪʟʟ ʙᴇ ᴋɪᴄᴋᴇᴅ.`
+            : `📖 *HOW THIS WORKS*\n\n1. *Add Code (+91):* Aɢᴀʀ ᴀᴀᴘ ᴄʜᴀʜᴛᴇ ʜᴀɪɴ ᴋɪ sɪʀғ Iɴᴅɪᴀɴ ɴᴜᴍʙᴇʀs ᴍᴇssᴀɢᴇ ᴋᴀʀᴇɪɴ, ᴛᴏʜ 91 ᴀᴅᴅ ᴋᴀʀᴇɪɴ.\n2. *VIP Number:* Bᴏᴛ ɪɴ ɴᴜᴍʙᴇʀs ᴋᴏ ᴋᴀʙʜɪ ᴅᴇʟᴇᴛᴇ ɴᴀʜɪ ᴋᴀʀᴇɢᴀ.\n3. *Auto-Kick:* 3 ᴍᴇssᴀɢᴇs ᴅᴇʟᴇᴛᴇ ʜᴏɴᴇ ᴋᴇ ʙᴀᴀᴅ ʙᴏᴛ ᴜsᴋᴏ ɴɪᴋᴀʟ ᴅᴇɢᴀ.`;
+        return safeSend(chatId, helpText); 
     }
 
     if (data === 'menu_logout_confirm') {
@@ -755,7 +772,14 @@ tgBot.on('message', async (msg) => {
     
     if (state.action === 'WAITING_FOR_BAN_ID') { adminConfig.bannedUsers.push(parseInt(text)); saveAdminConfig(); state.action = null; return safeSend(chatId, `🚫 Usᴇʀ ʙᴀɴɴᴇᴅ.`); }
     if (state.action === 'WAITING_FOR_UNBAN_ID') { adminConfig.bannedUsers = adminConfig.bannedUsers.filter(u => u !== parseInt(text)); saveAdminConfig(); state.action = null; return safeSend(chatId, `♻️ Usᴇʀ ᴜɴʙᴀɴɴᴇᴅ.`); }
-    if (state.action === 'WAITING_FOR_LOGIN_NUMBER') { state.action = null; return startWhatsAppClient(userId, chatId, text.replace(/[^0-9]/g, '')); }
+    
+    if (state.action === 'WAITING_FOR_LOGIN_NUMBER') { 
+        state.action = null; 
+        const cleanNumber = text.replace(/[^0-9]/g, '');
+        if (cleanNumber.length < 10) return safeSend(chatId, `❌ Iɴᴠᴀʟɪᴅ Nᴜᴍʙᴇʀ. Pʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ɴᴜᴍʙᴇʀ ᴡɪᴛʜ Cᴏᴜɴᴛʀʏ Cᴏᴅᴇ.`);
+        return startWhatsAppClient(userId, chatId, cleanNumber); 
+    }
+
     if (state.action === 'WAIT_GROUP_NAME') { state.groupConfig.baseName = text.trim(); state.action = 'WAIT_GROUP_COUNT'; return safeSend(chatId, `🔢 *Pʜᴀsᴇ 2:* Qᴜᴀɴᴛɪᴛʏ?`, { reply_markup: { inline_keyboard: [[{text: '❌ Cᴀɴᴄᴇʟ', callback_data: 'btn_main_menu'}]] } }); } 
     if (state.action === 'WAIT_GROUP_COUNT') { state.groupConfig.count = parseInt(text); state.action = 'WAIT_GROUP_MEMBER'; return safeSend(chatId, `👤 *Pʜᴀsᴇ 3:* Mᴇᴍʙᴇʀ ID?`, { reply_markup: { inline_keyboard: [[{text: '❌ Cᴀɴᴄᴇʟ', callback_data: 'btn_main_menu'}]] } }); } 
     if (state.action === 'WAIT_GROUP_MEMBER') { state.groupConfig.memberId = text.replace(/[^0-9]/g, '') + '@c.us'; state.action = 'WAIT_GROUP_DESC'; return safeSend(chatId, `📝 *Pʜᴀsᴇ 4:* Dᴇsᴄ?`, { reply_markup: { inline_keyboard: [[{text: '⏩ Sᴋɪᴘ', callback_data: 'grp_skip_desc'}], [{text: '❌ Cᴀɴᴄᴇʟ', callback_data: 'btn_main_menu'}]] } }); } 
