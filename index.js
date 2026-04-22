@@ -20,7 +20,7 @@ process.on('unhandledRejection', (reason) => {
 const app = express();
 const port = process.env.PORT || 8080;
 app.get('/', (req, res) => { 
-    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 VORTEX V48.5 (Anti-Hang Edition) Active</h1>'); 
+    res.send('<h1 style="color:#00ffcc;background:#121212;height:100vh;text-align:center;padding-top:20%;">🚀 VORTEX V50 (Dual Auth Engine) Active</h1>'); 
 });
 app.listen(port, () => {
     console.log(`☁️ [SERVER] Web Interface Active on Port ${port}`);
@@ -35,7 +35,7 @@ const OWNER_USERNAME = '@Naimish555';
 
 const tgBot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
-// 🔥 ULTIMATE GHOST PROTOCOL (No Proxy, Raw Stealth Flags)
+// 🔥 V50 FIX: BAREBONES CHROME FLAGS TO PREVENT HANGING ON LOW RAM SERVERS
 const puppeteerOptions = {
     headless: true,
     args: [
@@ -43,13 +43,9 @@ const puppeteerOptions = {
         '--disable-setuid-sandbox', 
         '--disable-dev-shm-usage', 
         '--single-process', 
-        '--no-zygote', 
-        '--disable-gpu', 
-        '--no-first-run', 
-        '--disable-accelerated-2d-canvas',
-        '--disable-blink-features=AutomationControlled', 
-        '--disable-features=IsolateOrigins,site-per-process', 
-        '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        '--no-zygote',
+        '--disable-extensions',
+        '--disable-gpu'
     ]
 };
 
@@ -57,7 +53,7 @@ if (fs.existsSync('/data/data/com.termux/files/usr/bin/chromium-browser')) {
     puppeteerOptions.executablePath = '/data/data/com.termux/files/usr/bin/chromium-browser';
 }
 
-console.log(`\n🔥 VORTEX V48.5 INITIALIZING...\n`);
+console.log(`\n🔥 VORTEX V50 INITIALIZING...\n`);
 
 // ============================================================================
 // 🧠 4. STATE MANAGEMENT, MEMORY MAPS & PERSISTENT DB
@@ -136,7 +132,7 @@ function getState(userId) {
 }
 
 const DIVIDER = '━━━━━━━━━━━━━━━━━━━━';
-const FOOTER = `\n${DIVIDER}\n👑 _VORTEX Sʏsᴛᴇᴍ V48.5_ | Oᴡɴᴇʀ: ${OWNER_USERNAME}`;
+const FOOTER = `\n${DIVIDER}\n👑 _VORTEX Sʏsᴛᴇᴍ V50_ | Oᴡɴᴇʀ: ${OWNER_USERNAME}`;
 
 const texts = {
     'Eɴɢʟɪsʜ': { 
@@ -245,55 +241,63 @@ function hasFeatureAccess(userId, featureKey) {
 }
 
 // ============================================================================
-// 🚀 6. WHATSAPP ENGINE (V48.5 - ANTI INFINITE HANG FIX)
+// 🚀 6. WHATSAPP ENGINE (V50 - BAILEYS MIMIC UI & HANG FIX)
 // ============================================================================
 function startWhatsAppClient(userId, chatId, cleanNumber) {
     const session = activeClients.get(userId);
-    if (session && session.status === 'initializing') return safeSend(chatId, `⚠️ VORTEX ɪɴɪᴛɪᴀʟɪᴢᴀᴛɪᴏɴ ɪs ᴀʟʀᴇᴀᴅʏ ɪɴ ᴘʀᴏɢʀᴇss... Pʟᴇᴀsᴇ ᴡᴀɪᴛ.`);
+    if (session && session.status === 'initializing') return safeSend(chatId, `⚠️ VORTEX ɪɴɪᴛɪᴀʟɪᴢᴀᴛɪᴏɴ ɪs ᴀʟʀᴇᴀᴅʏ ɪɴ ᴘʀᴏɢʀᴇss...`);
 
     const sessionPath = path.join(__dirname, 'multi_sessions', `session-user_${userId}`);
-    if (cleanNumber && fs.existsSync(sessionPath)) {
+    if (fs.existsSync(sessionPath)) {
         try { fs.rmSync(sessionPath, { recursive: true, force: true }); } catch(e) { }
     }
 
     safeSend(chatId, `📡 *Pʜᴀsᴇ 1: Lᴀᴜɴᴄʜɪɴɢ VORTEX Eɴɢɪɴᴇ...*`);
     
-    // 🔥 V48.5 FIX: webVersionCache set to 'none' prevents infinite loading screen hang
     const clientOptions = { 
         authStrategy: new LocalAuth({ clientId: `user_${userId}`, dataPath: './multi_sessions' }), 
-        puppeteer: puppeteerOptions,
-        webVersionCache: { type: 'none' } 
+        puppeteer: puppeteerOptions
     };
     
     const client = new Client(clientOptions);
     activeClients.set(userId, { client: client, status: 'initializing', isReady: false });
 
-    // 🔥 V48.5 FIX: Immediate Watchdog to prevent silent Puppeteer crashes
     let watchdog = setTimeout(() => {
         const cur = activeClients.get(userId);
         if (cur && !cur.isReady) {
-            safeSend(chatId, `❌ *ENGINE TIMEOUT:*\nMᴇᴛᴀ API ɪs ᴜɴʀᴇsᴘᴏɴsɪᴠᴇ. Bᴏᴛ ᴡᴀs sᴛᴜᴄᴋ ᴏɴ WʜᴀᴛsAᴘᴘ Lᴏᴀᴅɪɴɢ sᴄʀᴇᴇɴ. Pʀᴏᴄᴇss ᴋɪʟʟᴇᴅ. Pʟᴇᴀsᴇ ᴄʟɪᴄᴋ Lᴏɢɪɴ ᴀɢᴀɪɴ.`);
+            safeSend(chatId, `❌ *TIMEOUT:*\nMᴇᴛᴀ API ɪs ɴᴏᴛ ʀᴇsᴘᴏɴᴅɪɴɢ. Pʀᴏᴄᴇss ᴋɪʟʟᴇᴅ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴏʀ ᴜsᴇ QR ᴍᴇᴛʜᴏᴅ.`);
             activeClients.delete(userId);
             client.destroy().catch(()=>{});
             if (fs.existsSync(sessionPath)) { try { fs.rmSync(sessionPath, { recursive: true, force: true }); } catch(e){} }
         }
-    }, 40000);
+    }, 60000);
     
-    let pairingCodeRequested = false;
+    let authAttempted = false;
     client.on('qr', async (qr) => { 
-        if (cleanNumber && !pairingCodeRequested) {
-            pairingCodeRequested = true;
-            clearTimeout(watchdog); // Engine didn't hang! We reached QR stage.
-            safeSend(chatId, `⏳ *Eɴɢɪɴᴇ Sʏɴᴄᴇᴅ! Rᴇǫᴜᴇsᴛɪɴɢ 8-Dɪɢɪᴛ Cᴏᴅᴇ...*`);
-            
+        if (authAttempted) return;
+        authAttempted = true;
+        clearTimeout(watchdog);
+
+        if (cleanNumber) {
             try {
-                await new Promise(r => setTimeout(r, 2000)); // Delay to stabilize API
                 const code = await client.requestPairingCode(cleanNumber);
                 const formattedCode = code ? code.match(/.{1,4}/g).join('-') : 'UNKNOWN';
-                safeSend(chatId, `✅ *AUTHENTICATION CODE:*\n\nNᴜᴍʙᴇʀ: +${cleanNumber}\nTᴏᴋᴇɴ: \`${formattedCode}\`\n\n_Eɴᴛᴇʀ ᴛʜɪs ᴄᴏᴅᴇ ɪɴ ʏᴏᴜʀ Lɪɴᴋᴇᴅ Dᴇᴠɪᴄᴇs sᴇᴄᴛɪᴏɴ ᴏɴ WʜᴀᴛsAᴘᴘ._`);
+                
+                // V50: EXACT MATCH UI TO YOUR SCREENSHOT
+                const msgTxt = `🔑 *Pᴀɪʀɪɴɢ Cᴏᴅᴇ:*\n\n\`${formattedCode}\`\n\n📋 *Sᴛᴇᴘs:*\n1️⃣ Oᴘᴇɴ WʜᴀᴛsAᴘᴘ ᴏɴ ʏᴏᴜʀ ᴘʜᴏɴᴇ\n2️⃣ Sᴇᴛᴛɪɴɢs ➔ Lɪɴᴋᴇᴅ Dᴇᴠɪᴄᴇs\n3️⃣ Tᴀᴘ "Lɪɴᴋ ᴀ Dᴇᴠɪᴄᴇ"\n4️⃣ Tᴀᴘ "Lɪɴᴋ ᴡɪᴛʜ ᴘʜᴏɴᴇ ɴᴜᴍʙᴇʀ ɪɴsᴛᴇᴀᴅ"\n5️⃣ Eɴᴛᴇʀ ᴄᴏᴅᴇ: \`${formattedCode}\`\n\n⏳ _Wᴀɪᴛɪɴɢ ғᴏʀ ᴄᴏɴғɪʀᴍᴀᴛɪᴏɴ..._`;
+                safeSend(chatId, msgTxt);
             } catch (err) {
-                safeSend(chatId, `❌ Cᴏᴅᴇ Gᴇɴᴇʀᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ: ${err.message}\n_Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ._`);
-                pairingCodeRequested = false;
+                safeSend(chatId, `❌ Cᴏᴅᴇ Gᴇɴᴇʀᴀᴛɪᴏɴ Fᴀɪʟᴇᴅ: ${err.message}\n_Pʟᴇᴀsᴇ ᴜsᴇ Pᴀɪʀ QR ᴍᴇᴛʜᴏᴅ._`);
+            }
+        } else {
+            try {
+                const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(qr)}`;
+                await tgBot.sendPhoto(chatId, qrApiUrl, { 
+                    caption: `📷 *QR CODE GENERATED*\n\n📋 *Sᴛᴇᴘs:*\n1️⃣ Oᴘᴇɴ WʜᴀᴛsAᴘᴘ ᴏɴ ʏᴏᴜʀ ᴘʜᴏɴᴇ\n2️⃣ Sᴇᴛᴛɪɴɢs ➔ Lɪɴᴋᴇᴅ Dᴇᴠɪᴄᴇs\n3️⃣ Tᴀᴘ "Lɪɴᴋ ᴀ Dᴇᴠɪᴄᴇ"\n4️⃣ Sᴄᴀɴ ᴛʜɪs QR ᴄᴏᴅᴇ\n\n⏳ _Wᴀɪᴛɪɴɢ ғᴏʀ ᴄᴏɴғɪʀᴍᴀᴛɪᴏɴ..._`,
+                    parse_mode: 'Markdown'
+                });
+            } catch(e) {
+                safeSend(chatId, `❌ Fᴀɪʟᴇᴅ ᴛᴏ ɢᴇɴᴇʀᴀᴛᴇ QR Iᴍᴀɢᴇ.`);
             }
         }
     });
@@ -314,6 +318,7 @@ function startWhatsAppClient(userId, chatId, cleanNumber) {
         safeSend(chatId, `🚨 *YOUR WA DISCONNECTED*\nRᴇᴀsᴏɴ: ${reason}\n\nSᴇssɪᴏɴ ᴇxᴘɪʀᴇᴅ. Pʜɪʀsᴇ ʟᴏɢɪɴ ᴋᴀʀᴏ!`); 
         activeClients.delete(userId); 
         await client.destroy().catch(()=>{}); 
+        const sessionPath = path.join(__dirname, 'multi_sessions', `session-user_${userId}`);
         if (fs.existsSync(sessionPath)) { try { fs.rmSync(sessionPath, { recursive: true, force: true }); } catch(e){} }
     });
     
@@ -595,10 +600,24 @@ tgBot.on('callback_query', async (query) => {
     if (data === 'sec_add_vip') { state.action = 'WAIT_SEC_ADD_VIP'; return tgBot.editMessageText(`👤 *ADD VIP NUMBER*\nEɴᴛᴇʀ ɴᴜᴍʙᴇʀ:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '❌ Cᴀɴᴄᴇʟ', callback_data: 'menu_security'}]] } }); }
     if (data === 'sec_rem_vip') { state.action = 'WAIT_SEC_REM_VIP'; return tgBot.editMessageText(`👤 *REMOVE VIP NUMBER*\nEɴᴛᴇʀ ɴᴜᴍʙᴇʀ:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{text: '❌ Cᴀɴᴄᴇʟ', callback_data: 'menu_security'}]] } }); }
 
+    // 🔥 V50 FIX: DUAL AUTH MENU EXACTLY LIKE SCREENSHOT
     if (data === 'menu_login') { 
+        const kb = { inline_keyboard: [
+            [{ text: '🔑 Pᴀɪʀ Cᴏᴅᴇ', callback_data: 'login_pair_code' }, { text: '📷 Pᴀɪʀ QR', callback_data: 'login_pair_qr' }],
+            [{ text: '🔙 Bᴀᴄᴋ', callback_data: 'btn_main_menu' }]
+        ]};
+        return tgBot.editMessageText(`📱 *Cᴏɴɴᴇᴄᴛ WʜᴀᴛsAᴘᴘ*\n\nCʜᴏᴏsᴇ ᴘᴀɪʀɪɴɢ ᴍᴇᴛʜᴏᴅ:`, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: kb });
+    }
+
+    if (data === 'login_pair_code') {
         state.action = 'WAITING_FOR_LOGIN_NUMBER';
-        const msgTxt = `🔐 *LOGIN WA*\n${DIVIDER}\nPʟᴇᴀsᴇ ᴇɴᴛᴇʀ ʏᴏᴜʀ ɴᴜᴍʙᴇʀ ᴡɪᴛʜ Cᴏᴜɴᴛʀʏ Cᴏᴅᴇ (Nᴏ '+').\n\n✅ Exᴀᴍᴘʟᴇ: \`919876543210\``;
-        return tgBot.editMessageText(msgTxt, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '❌ Cᴀɴᴄᴇʟ', callback_data: 'btn_main_menu' }]] } });
+        const msgTxt = `🔑 *Pᴀɪʀ Cᴏᴅᴇ*\n\nEɴᴛᴇʀ ʏᴏᴜʀ ᴘʜᴏɴᴇ ɴᴜᴍʙᴇʀ ᴡɪᴛʜ ᴄᴏᴜɴᴛʀʏ ᴄᴏᴅᴇ:\n\nExᴀᴍᴘʟᴇ: \`+919942222222\``;
+        return tgBot.editMessageText(msgTxt, { chat_id: chatId, message_id: query.message.message_id, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🔙 Bᴀᴄᴋ', callback_data: 'menu_login' }, { text: '❌ Cᴀɴᴄᴇʟ', callback_data: 'btn_main_menu' }]] } });
+    }
+
+    if (data === 'login_pair_qr') {
+        tgBot.deleteMessage(chatId, query.message.message_id).catch(()=>{});
+        return startWhatsAppClient(userId, chatId, null); // Direct Start
     }
 
     if (data.startsWith('admin_')) {
